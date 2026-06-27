@@ -19,6 +19,13 @@ all: ## Build and start the application
 	$(MAKE) db-create
 	$(MAKE) db-migrate
 
+clean: ## Stop and clean the application
+	$(MAKE) db-drop
+
+re: ## Rebuild the application
+	$(MAKE) clean
+	$(MAKE) all
+
 # database begin
 db-create: ## Create the database
 	@echo 'Creating the database...'

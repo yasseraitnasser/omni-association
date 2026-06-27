@@ -22,11 +22,11 @@ Le sujet de stage consiste sur la création d'un programme qui gère les abonnem
 
 - Le comité de chaque projet dois saisir le mentant des dons de chaque adhérent, le reçu du paiment, les factures des fournisseurs.
 
-- A la fun de chaque projet le comité dois présenter son rapport aux membres de l'association contenant le détail des entrées et des dépenses accompagnées des factures, bons et copies des chèques.
+- A la fin de chaque projet le comité dois présenter son rapport aux membres de l'association contenant le détail des entrées et des dépenses accompagnées des factures, bons et copies des chèques.
 
 - Les membres du bureau de l'association doivent présenter leur rapport annuel au abonnés une fois par année.
 
-- Chaque operations faite sur le compte bancaire de l'association doit étre justifié et une photo de chèque ou ordre de virement doit etre ajouter aux rapports.
+- Chaque operations faite sur le compte bancaire de l'association doit être justifié et une photo de chèque ou ordre de virement doit etre ajouter aux rapports.
 
 - Sur le programme, chaque abonné aura la possibilité de consulter son historique à savoir ses dons, son abonnement et ce qu'il doit à l'association.
 
