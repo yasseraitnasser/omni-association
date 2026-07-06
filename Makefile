@@ -2,7 +2,7 @@ include .env
 export
 # WARN: $(MAKEFILE_LIST) <=> Makefile .env
 
-.PHONY: help db-create db-migrate db-drop db-reset all
+.PHONY: help db-create db-migrate db-drop db-reset all clean re
 
 SQL_FILE := ./src/database/migrations/000_INITIAL.sql
 COLOR := \033[38;2;212;145;24m
@@ -26,7 +26,7 @@ re: ## Rebuild the application
 	$(MAKE) clean
 	$(MAKE) all
 
-# database begin
+# database
 db-create: ## Create the database
 	@echo 'Creating the database...'
 	@pg_isready || (echo "Postgres is not running!" && exit 1)
@@ -45,4 +45,4 @@ db-reset: ## Reset the database (only use if already set)
 	$(MAKE) db-drop
 	$(MAKE) db-create
 	$(MAKE) db-migrate
-# database end
+# esabatad
