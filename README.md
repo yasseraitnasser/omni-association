@@ -5,6 +5,7 @@ A lightweight, blazing-fast web application for managing non-profit association 
 No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary bloat. This project uses Go for runtime speed, PostgeSQL for strict relational integrity, and Server-Side Rendered HTML for a clean, reliable frontend architecture.
 
 ## Repository Blueprint
+```
 .
 ├── LICENSE
 ├── Makefile                        # High-level DevOps command abstraction
@@ -20,13 +21,16 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 │   └── templates
 │       └── layouts
 │           └── layout.html         # Base HTML layout skeleton
+```
 
 ## Local Setup & Infrastracture
 1. Match Your System's Postgres Credentials
 Before doing anything you must ensure that you local PostgreSQL instance actually has a user role that matches you configuration.
+
 ⚠️CRITICAL COTCHA: PostgreSQL will not automatically create database users based on your environment file. Whatever value you chose for `DB_USER` must exist as an authorized role in your local cluster, otherwise the connection pool initialzation (`db.Ping()`) will fail with an authentication error.
 If your chosen user doesn't exist, log into your master Postgres instance and provision then manually:
 `CREATE USER "your_chosen_name" WITH PASSWORD 'your_chosen_password' CREATEDB;`
+
 2. Configuration Environment Variables
 Create a .env file at the root level of this project:
 ```
