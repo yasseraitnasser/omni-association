@@ -56,5 +56,6 @@ func main() {
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
 	domain := host + ":" + port
+	fmt.Println("Listening on:", domain)
 	http.ListenAndServe(domain, router)
 }

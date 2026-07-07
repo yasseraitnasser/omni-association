@@ -18,6 +18,7 @@ help: ## Display this help and exit
 all: ## Build and run the application
 	$(MAKE) db-create
 	$(MAKE) db-migrate
+	$(MAKE) server-run
 
 clean: ## Stop and clean the application
 	$(MAKE) db-drop
@@ -25,6 +26,12 @@ clean: ## Stop and clean the application
 re: ## Rebuild and run the application
 	$(MAKE) clean
 	$(MAKE) all
+
+# backend
+server-run: ## Run the backend server
+	@echo 'Starting backend server...'
+	@go run ./src/...
+# dnekcab
 
 # database
 db-create: ## Create the database
