@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/yasseraitnasser/omni-association/src/database"
 )
 
 type Data struct {
@@ -40,13 +41,20 @@ func main() {
 	router.HandleFunc("/books/{title}/page/{page}", requestSegment)
 	router.HandleFunc("/", home)
 
-	err := godotenv.Load(".env")
+	var err error
+	err = godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	err = database.InitDB()
+	if err != nil {
+		log.Fatalf("Could not connect to the database: %v", err)
+	}
+	defer database.DB.Close()
+
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
 	domain := host + ":" + port
-
 	http.ListenAndServe(domain, router)
 }

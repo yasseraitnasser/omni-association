@@ -15,32 +15,32 @@ help: ## Display this help and exit
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  $(COLOR)%-15s$(RESET) %s\n", $$1, $$2}'
 
-all: ## Build and start the application
+all: ## Build and run the application
 	$(MAKE) db-create
 	$(MAKE) db-migrate
 
 clean: ## Stop and clean the application
 	$(MAKE) db-drop
 
-re: ## Rebuild the application
+re: ## Rebuild and run the application
 	$(MAKE) clean
 	$(MAKE) all
 
 # database
 db-create: ## Create the database
 	@echo 'Creating the database...'
-	@pg_isready || (echo "Postgres is not running!" && exit 1)
-	@createdb $(DB_NAME)
+	@pg_isready -h $(DB_HOST) -p $(DB_PORT) || (echo "Postgres is not running!" && exit 1)
+	@PGPASSWORD=$(DB_PASS) createdb $(DB_NAME) -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER)
 
 db-migrate: ## Migrate the database
 	@echo 'Running database schema...'
-	psql $(DB_NAME) -f $(SQL_FILE)
+	PGPASSWORD=$(DB_PASS) psql $(DB_NAME) -f $(SQL_FILE) -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER)
 
 db-drop: ## Drop the database
 	@echo 'Dropping the database...'
-	@dropdb $(DB_NAME)
+	@PGPASSWORD=$(DB_PASS) dropdb $(DB_NAME) -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER)
 
-db-reset: ## Reset the database (only use if already set)
+db-reset: ## Reset the database
 	@echo 'Resetting the database...'
 	$(MAKE) db-drop
 	$(MAKE) db-create
