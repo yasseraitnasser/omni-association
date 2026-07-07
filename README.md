@@ -23,9 +23,9 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 
 ## Local Setup & Infrastracture
 1. Match Your System's Postgres Credentials
-Before doing anythingm you must ensure that you local PostgreSQL instance actually has a user role that matches you configuration.
-⚠️CRITICAL COTCHA: PostgreSQL will not automatically create database users based on your environment file. Whatever value you chose for `DB_USER` must exist as an authorized role in your local cluster, or the connection pool initialzation (`db.Ping()`) will fail with an authentication error.
-if your chosen user doesn't exist, log into your master Postgres instance and provision them manually:
+Before doing anything you must ensure that you local PostgreSQL instance actually has a user role that matches you configuration.
+⚠️CRITICAL COTCHA: PostgreSQL will not automatically create database users based on your environment file. Whatever value you chose for `DB_USER` must exist as an authorized role in your local cluster, otherwise the connection pool initialzation (`db.Ping()`) will fail with an authentication error.
+If your chosen user doesn't exist, log into your master Postgres instance and provision then manually:
 `CREATE USER "your_chosen_name" WITH PASSWORD 'your_chosen_password' CREATEDB;`
 2. Configuration Environment Variables
 Create a .env file at the root level of this project:
