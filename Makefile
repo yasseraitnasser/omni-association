@@ -2,7 +2,7 @@ include .env
 export
 # WARN: $(MAKEFILE_LIST) <=> Makefile .env
 
-.PHONY: help db-create db-migrate db-drop db-reset all clean re
+.PHONY: help db-create db-migrate db-drop db-reset all clean re server-run
 
 SQL_FILE := ./src/database/migrations/000_INITIAL.sql
 COLOR := \033[38;2;212;145;24m
