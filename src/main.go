@@ -53,9 +53,11 @@ func main() {
 	}
 	defer database.DB.Close()
 
-	port := os.Getenv("PORT")
-	host := os.Getenv("HOST")
+	database.AddAdminUser()
+
+	port := os.Getenv("SERVER_PORT")
+	host := os.Getenv("SERVER_HOST")
 	domain := host + ":" + port
-	fmt.Println("Listening on:", domain)
+	log.Printf("Listening on: %s\n", domain)
 	http.ListenAndServe(domain, router)
 }
