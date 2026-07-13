@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -9,9 +8,11 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
 )
 
+type Middleware func(http.HandlerFunc) http.HandlerFunc
 type Data struct {
 	PageTitle string
 }
@@ -27,18 +28,30 @@ func home(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func requestSegment(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	title := vars["title"]
-	page := vars["page"]
+func Method(m string) Middleware {
+	return func(f http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != m {
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
 
-	fmt.Fprintf(w, "you've requested the book: %s on page %s\n", title, page)
+			f(w, r)
+		}
+	}
+}
+
+func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
+	for _, m := range middlewares {
+		f = m(f)
+	}
+	return f
 }
 
 func main() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/books/{title}/page/{page}", requestSegment)
+	router.HandleFunc("/login", Chain(auth.Login, Method("POST")))
 	router.HandleFunc("/", home)
 
 	var err error
@@ -53,9 +66,11 @@ func main() {
 	}
 	defer database.DB.Close()
 
-	port := os.Getenv("PORT")
-	host := os.Getenv("HOST")
+	database.AddAdminUser()
+
+	port := os.Getenv("SERVER_PORT")
+	host := os.Getenv("SERVER_HOST")
 	domain := host + ":" + port
-	fmt.Println("Listening on:", domain)
+	log.Printf("Listening on: %s\n", domain)
 	http.ListenAndServe(domain, router)
 }
