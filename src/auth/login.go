@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/yasseraitnasser/omni-association/src/database"
+	"github.com/yasseraitnasser/omni-association/src/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,7 +20,7 @@ type LoginSchema struct {
 	Password string `json:"password" validate:"required,min=12"`
 }
 
-type CustomClaims struct {
+type Claims struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 	Role string `json:"role"`
@@ -27,13 +28,11 @@ type CustomClaims struct {
 }
 
 func generateAccessToken(id int, name string, role string) (string, error) {
-	secret := os.Getenv("JWT_SECRET")
-	expiry := os.Getenv("JWT_EXPIRY")
-	duration, err := time.ParseDuration(expiry)
+	duration, err := time.ParseDuration(utils.JWT_EXPIRY)
 	if err != nil {
 		return "", fmt.Errorf("Invalid JWT_EXPIRY format: %v", err)
 	}
-	claims := CustomClaims{
+	claims := Claims{
 		ID:   id,
 		Name: name,
 		Role: role,
@@ -44,7 +43,7 @@ func generateAccessToken(id int, name string, role string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(secret))
+	return token.SignedString([]byte(utils.JWT_SECRET))
 }
 
 func ValidateLoginSchema(req LoginSchema) error {
@@ -90,7 +89,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	match := CheckPassword(req.Password, dbPassword)
 	if match == false {
 		log.Print("Auth fail (Password mismatch)")
-		log.Print("real password: ", os.Getenv("ADMIN_PASS"))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -105,4 +103,55 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := map[string]string{"token": token}
 	json.NewEncoder(w).Encode(response)
+}
+
+func AuthenticateToken(w http.ResponseWriter, r *http.Request) *Claims {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, "Unauthorized: No token provided", http.StatusUnauthorized)
+		return nil
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		http.Error(w, "Unauthorized: Malformed authorization header", http.StatusUnauthorized)
+		return nil
+	}
+	tokenString := parts[1]
+
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (any, error) {
+		return []byte(utils.JWT_SECRET), nil
+	})
+	if err != nil || !token.Valid {
+		http.Error(w, "Unauthorized: Invalid or expired token", http.StatusUnauthorized)
+		return nil
+	}
+	return claims
+}
+
+func IsBoardMember(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims := AuthenticateToken(w, r)
+		if claims == nil {
+			return
+		}
+
+		isBoardMember := claims.Role == "president" ||
+			claims.Role == "vice-president" ||
+			claims.Role == "treasurer" ||
+			claims.Role == "assistant-treasurer" ||
+			claims.Role == "general-secretary" ||
+			claims.Role == "assistant-general-secretary" ||
+			claims.Role == "advisor"
+		if !isBoardMember {
+			http.Error(w, "Forbidden: Board Member privileges required", http.StatusForbidden)
+			return
+		}
+
+		next(w, r)
+	}
+}
+
+func InviteMember(w http.ResponseWriter, r *http.Request) {
 }

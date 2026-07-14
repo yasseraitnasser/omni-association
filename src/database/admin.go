@@ -2,8 +2,8 @@ package database
 
 import (
 	"log"
-	"os"
 
+	"github.com/yasseraitnasser/omni-association/src/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,9 +14,9 @@ func HashPassword(password string) (string, error) {
 
 func AddAdminUser() {
 	var err error
-	adminName := os.Getenv("ADMIN_NAME")
-	adminEmail := os.Getenv("ADMIN_EMAIL")
-	adminPass := os.Getenv("ADMIN_PASS")
+	adminName := utils.ADMIN_NAME
+	adminEmail := utils.ADMIN_EMAIL
+	adminPass := utils.ADMIN_PASS
 	hash, err := HashPassword(adminPass)
 	adminRole := "president"
 	paidFee := true

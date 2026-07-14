@@ -4,12 +4,12 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
+	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
@@ -28,37 +28,24 @@ func home(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func Method(m string) Middleware {
-	return func(f http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != m {
-				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-				return
-			}
-
-			f(w, r)
-		}
-	}
-}
-
 func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
-	for _, m := range middlewares {
-		f = m(f)
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		f = middlewares[i](f)
 	}
 	return f
 }
 
 func main() {
 	router := mux.NewRouter()
-
-	router.HandleFunc("/login", Chain(auth.Login, Method("POST")))
-	router.HandleFunc("/", home)
-
 	var err error
-	err = godotenv.Load(".env")
+	err = utils.InitEnv()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	router.HandleFunc("/login", (auth.Login)).Methods("POST")
+	router.HandleFunc("/api/members/invite", Chain(auth.InviteMember, auth.IsBoardMember)).Methods("POST")
+	router.HandleFunc("/", home)
 
 	err = database.InitDB()
 	if err != nil {
@@ -68,9 +55,7 @@ func main() {
 
 	database.AddAdminUser()
 
-	port := os.Getenv("SERVER_PORT")
-	host := os.Getenv("SERVER_HOST")
-	domain := host + ":" + port
+	domain := utils.SERVER_HOST + ":" + utils.SERVER_PORT
 	log.Printf("Listening on: %s\n", domain)
 	http.ListenAndServe(domain, router)
 }
