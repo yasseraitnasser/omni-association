@@ -3,20 +3,19 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"os"
 
-	_ "github.com/lib/pq"
+	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
 var DB *sql.DB
 
 func InitDB() error {
 	dsn := fmt.Sprintf("dbname=%s host=%s port=%s user=%s password=%s sslmode=disable",
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASS"),
+		utils.DB_NAME,
+		utils.DB_HOST,
+		utils.DB_PORT,
+		utils.DB_USER,
+		utils.DB_PASS,
 	)
 	var err error
 	DB, err = sql.Open("postgres", dsn)
