@@ -13,6 +13,10 @@ func AddAdminUser() {
 	adminEmail := utils.ADMIN_EMAIL
 	adminPass := utils.ADMIN_PASS
 	hash, err := HashPassword(adminPass)
+	if err != nil {
+		log.Printf("Could not hash password")
+		return
+	}
 	adminRole := "president"
 	paidFee := true
 

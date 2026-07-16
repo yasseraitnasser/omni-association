@@ -45,6 +45,7 @@ func main() {
 
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(auth.InviteMember, auth.IsBoardMember)).Methods("POST")
+	router.HandleFunc("/api/members/accept", auth.AcceptInvitation).Methods("POST")
 	router.HandleFunc("/", home)
 
 	err = database.InitDB()
