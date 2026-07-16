@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS members (
 	name		TEXT NOT NULL,
 	email		VARCHAR(255) UNIQUE NOT NULL,
 	password	TEXT DEFAULT NULL,
-	invite_token	VARCHAR(255) DEFAULT NULL,
+	invite_token	VARCHAR(255) UNIQUE DEFAULT NULL,
 	invite_expiry	TIMESTAMP DEFAULT NULL,
 	role		member_role NOT NULL DEFAULT 'member',
 	paid_fee	BOOLEAN DEFAULT FALSE,
