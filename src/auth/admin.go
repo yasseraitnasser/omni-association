@@ -1,16 +1,11 @@
-package database
+package auth
 
 import (
 	"log"
 
+	"github.com/yasseraitnasser/omni-association/src/database"
 	"github.com/yasseraitnasser/omni-association/src/utils"
-	"golang.org/x/crypto/bcrypt"
 )
-
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	return string(bytes), err
-}
 
 func AddAdminUser() {
 	var err error
@@ -24,7 +19,7 @@ func AddAdminUser() {
 	query := `INSERT INTO members (name, email, password, role, paid_fee)
 		VALUES ($1, $2, $3, $4, $5) ON CONFLICT (email) DO NOTHING;
 	`
-	_, err = DB.Exec(query, adminName, adminEmail, hash, adminRole, paidFee)
+	_, err = database.DB.Exec(query, adminName, adminEmail, hash, adminRole, paidFee)
 	if err != nil {
 		log.Printf("Could not exec query: %v", err)
 		log.Printf("No admin user")

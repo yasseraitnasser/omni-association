@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -22,8 +23,11 @@ var ADMIN_PASS string
 var JWT_SECRET string
 var JWT_EXPIRY string
 
+var SECURE_TOKEN_LENGTH int
+var SECURE_TOKEN_EXPIRY string
+
 func InitEnv() error {
-	err := godotenv.Load(".env")
+	var err = godotenv.Load(".env")
 	if err != nil {
 		return err
 	}
@@ -43,6 +47,12 @@ func InitEnv() error {
 
 	JWT_SECRET = os.Getenv("JWT_SECRET")
 	JWT_EXPIRY = os.Getenv("JWT_EXPIRY")
+
+	SECURE_TOKEN_LENGTH, err = strconv.Atoi(os.Getenv("SECURE_TOKEN_LENGTH"))
+	if err != nil {
+		return err
+	}
+	SECURE_TOKEN_EXPIRY = os.Getenv("SECURE_TOKEN_EXPIRY")
 
 	return nil
 }

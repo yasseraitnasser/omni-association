@@ -53,7 +53,7 @@ func main() {
 	}
 	defer database.DB.Close()
 
-	database.AddAdminUser()
+	auth.AddAdminUser()
 
 	domain := utils.SERVER_HOST + ":" + utils.SERVER_PORT
 	log.Printf("Listening on: %s\n", domain)
