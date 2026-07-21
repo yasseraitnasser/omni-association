@@ -12,7 +12,7 @@ func AddAdminUser() {
 	adminName := utils.ADMIN_NAME
 	adminEmail := utils.ADMIN_EMAIL
 	adminPass := utils.ADMIN_PASS
-	hash, err := HashPassword(adminPass)
+	hash, err := utils.HashPassword(adminPass)
 	if err != nil {
 		log.Printf("Could not hash password")
 		return

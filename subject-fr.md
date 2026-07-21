@@ -34,4 +34,4 @@ Le sujet de stage consiste sur la création d'un programme qui gère les abonnem
 
 - Scanner CIN et ajout des informations de l'adhérent sais les saisire (idem: ordre virement)
 
-- Envoyer main contenant ce que l'adhérent doit à l'association.
+- Envoyer mail contenant ce que l'adhérent doit à l'association.

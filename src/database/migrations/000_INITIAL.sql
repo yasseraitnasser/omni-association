@@ -66,12 +66,13 @@ CREATE TABLE IF NOT EXISTS subscribers (
 CREATE TABLE IF NOT EXISTS projects (
 	id		SERIAL PRIMARY KEY,
 	name		TEXT NOT NULL,
+	description	TEXT NOT NULL,
 	budget		INTEGER NOT NULL DEFAULT 0,
 	status		project_status NOT NULL DEFAULT 'planning',
 	created_at	TIMESTAMP DEFAULT now() NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS project_members (
+CREATE TABLE IF NOT EXISTS project_committees (
 	project_id	INTEGER REFERENCES projects(id) ON DELETE CASCADE,
 	member_id	INTEGER REFERENCES members(id) ON DELETE CASCADE,
 	role_in_project	project_roles NOT NULL DEFAULT 'contributor',

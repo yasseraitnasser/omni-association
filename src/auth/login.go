@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/yasseraitnasser/omni-association/src/database"
+	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
 type LoginSchema struct {
@@ -48,7 +49,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match := CheckPassword(req.Password, dbPassword)
+	match := utils.CheckPassword(req.Password, dbPassword)
 	if match == false {
 		log.Print("Auth fail (Password mismatch)")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)

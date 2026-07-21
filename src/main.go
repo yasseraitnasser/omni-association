@@ -9,6 +9,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
+	"github.com/yasseraitnasser/omni-association/src/members"
+	"github.com/yasseraitnasser/omni-association/src/projects"
 	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
@@ -44,8 +46,10 @@ func main() {
 	}
 
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
-	router.HandleFunc("/api/members/invite", Chain(auth.InviteMember, auth.IsBoardMember)).Methods("POST")
-	router.HandleFunc("/api/members/accept", auth.AcceptInvitation).Methods("POST")
+	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
+	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
+	router.HandleFunc("/api/projects", Chain(projects.CreateProject, members.IsBoardMember)).Methods("POST")
+	router.HandleFunc("/api/projects/{id}/committee", Chain(projects.AssignCommitteeMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/", home)
 
 	err = database.InitDB()

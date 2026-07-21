@@ -1,4 +1,4 @@
-package auth
+package members
 
 import (
 	"crypto/rand"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
 	"github.com/yasseraitnasser/omni-association/src/utils"
 )
@@ -26,7 +27,7 @@ type InviteResponseSchema struct {
 
 func IsBoardMember(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		claims := AuthenticateToken(w, r)
+		claims := auth.AuthenticateToken(w, r)
 		if claims == nil {
 			return
 		}
@@ -65,7 +66,7 @@ func savePendingMemberToDB(name, email, role, token string, expiry time.Time) er
 		VALUES ($1, $2, $3, $4, $5);`
 	_, err := database.DB.Exec(query, name, email, role, token, expiry)
 	if err != nil {
-		log.Printf("Could not exec query: %v", err)
+		log.Printf("Could not exec query: %v\n", err)
 		return err
 	}
 	log.Printf("Member added successfully: %s\n", email)
@@ -153,7 +154,7 @@ func AcceptInvitation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query = `UPDATE members SET password = $1, invite_token = $2, invite_expiry = $3 WHERE invite_token = $4`
-	hash, err := HashPassword(req.Password)
+	hash, err := utils.HashPassword(req.Password)
 	if err != nil {
 		http.Error(w, "Could not hash password", http.StatusInternalServerError)
 		return
