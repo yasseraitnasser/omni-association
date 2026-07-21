@@ -7,8 +7,11 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
+	"github.com/lib/pq"
 	"github.com/yasseraitnasser/omni-association/src/database"
 )
 
@@ -93,9 +96,56 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 }
 
 type AssignCommitteeSchema struct {
-	Name string
-	Role string
+	MemberID int    `json:"member_id" validate:"required"`
+	Role     string `json:"role" validate:"required,oneof=contributor project-lead"`
+}
+
+func validateAssignCommitteeSchema(req AssignCommitteeSchema) error {
+	validate := validator.New()
+	return validate.Struct(req)
 }
 
 func AssignCommitteeMember(w http.ResponseWriter, r *http.Request) {
+	var req AssignCommitteeSchema
+	var err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	err = validateAssignCommitteeSchema(req)
+	if err != nil {
+		http.Error(w, "Invalid Schema", http.StatusBadRequest)
+		return
+	}
+
+	vars := mux.Vars(r)
+	projectID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid project ID", http.StatusBadRequest)
+		return
+	}
+
+	query := `INSERT INTO project_committees (project_id, member_id, role_in_project) VALUES ($1, $2, $3)`
+	_, err = database.DB.Exec(query, projectID, req.MemberID, req.Role)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				http.Error(w, "Project or member does not exist", http.StatusNotFound)
+				return
+			case "23505":
+				http.Error(w, "Member already assgined", http.StatusConflict)
+				return
+			case "22P02":
+				http.Error(w, "Invalid role", http.StatusBadRequest)
+				return
+			}
+		}
+
+		http.Error(w, "Database Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
