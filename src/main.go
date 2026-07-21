@@ -49,7 +49,7 @@ func main() {
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
 	router.HandleFunc("/api/projects", Chain(projects.CreateProject, members.IsBoardMember)).Methods("POST")
-	router.HandleFunc("/api/projects/{id}/committee", Chain(projects.AssignCommitteeMember, members.IsBoardMember)).Methods("POST")
+	router.HandleFunc("/api/projects/{id:[0-9]+}/committee", Chain(projects.AssignCommitteeMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/", home)
 
 	err = database.InitDB()
