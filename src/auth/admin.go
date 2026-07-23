@@ -18,12 +18,11 @@ func AddAdminUser() {
 		return
 	}
 	adminRole := "president"
-	paidFee := true
 
-	query := `INSERT INTO members (name, email, password, role, paid_fee)
-		VALUES ($1, $2, $3, $4, $5) ON CONFLICT (email) DO NOTHING;
+	query := `INSERT INTO members (name, email, password, role)
+		VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING;
 	`
-	_, err = database.DB.Exec(query, adminName, adminEmail, hash, adminRole, paidFee)
+	_, err = database.DB.Exec(query, adminName, adminEmail, hash, adminRole)
 	if err != nil {
 		log.Printf("Could not exec query: %v", err)
 		log.Printf("No admin user")
