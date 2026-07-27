@@ -68,6 +68,12 @@ func saveTransactionToDB(projectID, committeeID int, req CreateTransactionSchema
 }
 
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
+	claims := auth.AuthenticateToken(w, r)
+	if claims == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var req CreateTransactionSchema
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -80,22 +86,16 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid schema", http.StatusBadRequest)
 		return
 	}
-	transactionDate, err := time.Parse("2006-01-02 at 15:04", req.TransactionDate)
+	transactionDate, err := time.Parse("2006-01-02", req.TransactionDate)
 	if err != nil {
-		http.Error(w, "Invalid date format: Expected 'YYYY-MM-DD at HH:MM'", http.StatusBadRequest)
-		return
-	}
-
-	claims := auth.AuthenticateToken(w, r)
-	if claims == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		http.Error(w, "Invalid date format: Expected 'YYYY-MM-DD'", http.StatusBadRequest)
 		return
 	}
 
 	vars := mux.Vars(r)
 	projectID, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Printf("Error converting id: %v", err)
+		log.Printf("Error converting project id: %v", err)
 		http.Error(w, "Invalid project ID", http.StatusBadRequest)
 		return
 	}
