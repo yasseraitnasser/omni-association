@@ -1,11 +1,18 @@
 package projects
 
 import (
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -13,6 +20,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
+	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
 type CreateTransactionSchema struct {
@@ -22,8 +30,6 @@ type CreateTransactionSchema struct {
 	ExternalEntityName *string `json:"external_entity_name" validate:"required_if=Source external_association,required_if=Source government"`
 	Amount             int     `json:"amount" validate:"gt=0"`
 	PaymentMethod      string  `json:"payment_method" validate:"required,oneof=bank_transfer check cash"`
-	ProofDocURL        string  `json:"proof_doc_url" validate:"required,url"`
-	ReceiptURL         string  `json:"receipt_url" validate:"required,url"`
 	Description        string  `json:"description" validate:"required"`
 	TransactionDate    string  `json:"transaction_date" validate:"required"`
 }
@@ -33,7 +39,72 @@ func validateTransactionCreationSchema(req CreateTransactionSchema) error {
 	return validate.Struct(req)
 }
 
-func saveTransactionToDB(projectID, committeeID int, req CreateTransactionSchema, transactionDate time.Time) error {
+func saveHashedFile(fileHeader *multipart.FileHeader) (string, error) {
+	src, err := fileHeader.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	hasher := sha256.New()
+	fmt.Fprintf(hasher, "%d", time.Now().UnixNano())
+	if _, err := io.Copy(hasher, src); err != nil {
+		return "", err
+	}
+
+	if _, err := src.Seek(0, io.SeekStart); err != nil {
+		return "", err
+	}
+
+	hashPrefix := hex.EncodeToString(hasher.Sum(nil))[:12]
+	cleanFilename := filepath.Base(fileHeader.Filename)
+	newFilename := fmt.Sprintf("%s_%s", hashPrefix, cleanFilename)
+	destPath := filepath.Join(utils.UPLOAD_DIR, newFilename)
+
+	dest, err := os.Create(destPath)
+	if err != nil {
+		return "", err
+	}
+	defer dest.Close()
+
+	if _, err := io.Copy(dest, src); err != nil {
+		return "", err
+	}
+
+	return newFilename, nil
+}
+
+func uploadDocs(w http.ResponseWriter, r *http.Request) (string, string, error) {
+	if err := os.MkdirAll(utils.UPLOAD_DIR, 0755); err != nil {
+		http.Error(w, "Failed to create upload directory", http.StatusInternalServerError)
+		return "", "", err
+	}
+
+	files := []*multipart.FileHeader{}
+	filesNames := []string{"proof_doc", "receipt"}
+	for _, value := range filesNames {
+		_, fileHeader, err := r.FormFile(value)
+		if err != nil {
+			http.Error(w, "Missing or invalid file for value '"+value+"'", http.StatusBadRequest)
+			return "", "", err
+		}
+		files = append(files, fileHeader)
+	}
+
+	savedFiles := make([]string, 0, len(files))
+	for _, fileHeader := range files {
+		savedName, err := saveHashedFile(fileHeader)
+		if err != nil {
+			http.Error(w, "Failed to save file: "+err.Error(), http.StatusInternalServerError)
+			return "", "", err
+		}
+		savedFiles = append(savedFiles, savedName)
+	}
+
+	return savedFiles[0], savedFiles[1], nil
+}
+
+func saveTransactionToDB(projectID, committeeID int, proofDocPath, receiptPath string, req CreateTransactionSchema, transactionDate time.Time) error {
 	query := `INSERT INTO transactions (
 		project_id,
 		recorded_by,
@@ -59,8 +130,8 @@ func saveTransactionToDB(projectID, committeeID int, req CreateTransactionSchema
 		req.ExternalEntityName,
 		req.Amount,
 		req.PaymentMethod,
-		req.ProofDocURL,
-		req.ReceiptURL,
+		proofDocPath,
+		receiptPath,
 		req.Description,
 		transactionDate,
 	)
@@ -70,18 +141,29 @@ func saveTransactionToDB(projectID, committeeID int, req CreateTransactionSchema
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	claims := auth.AuthenticateToken(w, r)
 	if claims == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		// auth.Authenticate already responses according to the error type
+		return
+	}
+
+	maxSize := utils.MAX_FILE_SIZE << 20
+	if err := r.ParseMultipartForm(int64(maxSize)); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	metadataStr := r.FormValue("metadata")
+	if metadataStr == "" {
+		http.Error(w, "Missing metadata field", http.StatusBadRequest)
 		return
 	}
 
 	var req CreateTransactionSchema
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	if err := json.Unmarshal([]byte(metadataStr), &req); err != nil {
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
-	err = validateTransactionCreationSchema(req)
+	err := validateTransactionCreationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid schema", http.StatusBadRequest)
 		return
@@ -112,9 +194,18 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = saveTransactionToDB(projectID, claims.ID, req, transactionDate)
+	proofDocPath, receiptPath, err := uploadDocs(w, r)
+	if err != nil {
+		return
+	}
+
+	err = saveTransactionToDB(projectID, claims.ID, proofDocPath, receiptPath, req, transactionDate)
 	if err != nil {
 		log.Printf("Could not insert transaction into db: %v", err)
+
+		os.Remove(filepath.Join(utils.UPLOAD_DIR, proofDocPath))
+		os.Remove(filepath.Join(utils.UPLOAD_DIR, receiptPath))
+
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
