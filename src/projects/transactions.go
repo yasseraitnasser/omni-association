@@ -26,11 +26,23 @@ type CreateTransactionSchema struct {
 	Type               string  `json:"type" validate:"required,oneof=income expense"`
 	Source             string  `json:"source" validate:"required,oneof=member donor_individual government external_association"`
 	DonorMemberID      *int    `json:"donor_member_id" validate:"required_if=Source member"`
-	ExternalEntityName *string `json:"external_entity_name" validate:"required_if=Source external_association,required_if=Source government"`
+	ExternalEntityName *string `json:"external_entity_name" validate:"required_if=Source external_association"`
 	Amount             int     `json:"amount" validate:"gt=0"`
 	PaymentMethod      string  `json:"payment_method" validate:"required,oneof=bank_transfer check cash"`
 	Description        string  `json:"description" validate:"required"`
 	TransactionDate    string  `json:"transaction_date" validate:"required"`
+}
+
+func (req *CreateTransactionSchema) sanitize() {
+	switch req.Source {
+	case "member":
+		req.ExternalEntityName = nil
+	case "external_association":
+		req.DonorMemberID = nil
+	default: // "government", "donor_individual"
+		req.DonorMemberID = nil
+		req.ExternalEntityName = nil
+	}
 }
 
 func validateTransactionCreationSchema(req CreateTransactionSchema) error {
@@ -138,6 +150,7 @@ func saveTransactionToDB(projectID, committeeID int, proofDocPath, receiptPath s
 		transaction_date
 	)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
+
 	_, err := database.DB.Exec(
 		query,
 		projectID,
@@ -181,6 +194,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	req.sanitize()
 	err := validateTransactionCreationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid schema", http.StatusBadRequest)
@@ -224,7 +238,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		os.Remove(filepath.Join(utils.UPLOAD_DIR, proofDocPath))
 		os.Remove(filepath.Join(utils.UPLOAD_DIR, receiptPath))
 
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		http.Error(w, "Transaction failed: referenced member or entity does not exist", http.StatusBadRequest)
 		return
 	}
 
