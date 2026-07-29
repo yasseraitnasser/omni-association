@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
 	"github.com/yasseraitnasser/omni-association/src/utils"
@@ -49,8 +48,7 @@ func IsBoardMember(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func validateMemberInvitationSchema(req InviteMemberSchema) error {
-	validate := validator.New()
-	return validate.Struct(req)
+	return utils.Validate.Struct(req)
 }
 
 func GenerateSecureToken() (string, error) {
@@ -122,8 +120,7 @@ type AcceptInvitationSchema struct {
 }
 
 func validateAcceptInvitationSchema(req AcceptInvitationSchema) error {
-	validate := validator.New()
-	return validate.Struct(req)
+	return utils.Validate.Struct(req)
 }
 
 func AcceptInvitation(w http.ResponseWriter, r *http.Request) {

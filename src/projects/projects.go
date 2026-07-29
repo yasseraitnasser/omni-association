@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/lib/pq"
 	"github.com/yasseraitnasser/omni-association/src/database"
+	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
 type CreateProjectSchema struct {
@@ -23,8 +23,7 @@ type CreateProjectSchema struct {
 }
 
 func validateProjectCreationSchema(req CreateProjectSchema) error {
-	validate := validator.New()
-	return validate.Struct(req)
+	return utils.Validate.Struct(req)
 }
 
 func saveProjectToDB(projectName, descrption string, leaderID, budget int) error {
@@ -101,8 +100,7 @@ type AssignCommitteeSchema struct {
 }
 
 func validateAssignCommitteeSchema(req AssignCommitteeSchema) error {
-	validate := validator.New()
-	return validate.Struct(req)
+	return utils.Validate.Struct(req)
 }
 
 func AssignCommitteeMember(w http.ResponseWriter, r *http.Request) {
