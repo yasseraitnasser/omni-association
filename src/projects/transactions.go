@@ -44,6 +44,26 @@ func saveHashedFile(fileHeader *multipart.FileHeader) (string, error) {
 	}
 	defer src.Close()
 
+	buffer := make([]byte, 512)
+	if _, err := src.Read(buffer); err != nil && err != io.EOF {
+		return "", err
+	}
+
+	contentType := http.DetectContentType(buffer)
+	allowedTypes := map[string]bool{
+		"image/png":       true,
+		"image/jpeg":      true,
+		"application/pdf": true,
+	}
+
+	if _, err := src.Seek(0, io.SeekStart); err != nil {
+		return "", err
+	}
+
+	if !allowedTypes[contentType] {
+		return "", fmt.Errorf("rejected: untrusted file type '%s'", contentType)
+	}
+
 	hasher := sha256.New()
 	fmt.Fprintf(hasher, "%d", time.Now().UnixNano())
 	if _, err := io.Copy(hasher, src); err != nil {
