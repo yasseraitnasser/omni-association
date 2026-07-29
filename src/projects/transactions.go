@@ -16,7 +16,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
@@ -35,8 +34,7 @@ type CreateTransactionSchema struct {
 }
 
 func validateTransactionCreationSchema(req CreateTransactionSchema) error {
-	validate := validator.New()
-	return validate.Struct(req)
+	return utils.Validate.Struct(req)
 }
 
 func saveHashedFile(fileHeader *multipart.FileHeader) (string, error) {

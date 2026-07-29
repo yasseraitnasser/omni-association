@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/yasseraitnasser/omni-association/src/database"
 	"github.com/yasseraitnasser/omni-association/src/utils"
 )
@@ -16,8 +15,7 @@ type LoginSchema struct {
 }
 
 func ValidateLoginSchema(req LoginSchema) error {
-	validate := validator.New()
-	return validate.Struct(req)
+	return utils.Validate.Struct(req)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
