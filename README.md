@@ -77,7 +77,7 @@ Everything else is abstracted away by the Makefile, Run `make help` (or simply `
 ```
 - Teardown: Drops the application database safely
 ```
-    make server-run
+    make clean
 ```
 
 ## Relational Database Architecture
