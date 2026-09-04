@@ -2,7 +2,7 @@
 A lightweight, blazing-fast web application for managing non-profit association memberships, finances, and projects.
 
 ## Tech Stack
-No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary bloat. This project uses Go for runtime speed, PostgeSQL for strict relational integrity, and Server-Side Rendered HTML for a clean, reliable frontend architecture.
+No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary bloat. This project uses Go for runtime speed, PostgreSQL for strict relational integrity, and Server-Side Rendered HTML for a clean, reliable frontend architecture.
 
 ## Repository Blueprint
 ```
@@ -11,11 +11,11 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 ├── Makefile                        # High-level DevOps command abstraction
 ├── README.md                       # Project documentation
 ├── go.mod                          # Go dependency manifest
-├── go.mod                          # cryptographic checksum of module versions
+├── go.sum                          # cryptographic checksum of module versions
 ├── .env.example                    # Example of local execution configuration
 ├── src
 │   ├── auth
-│   │   ├── admin.go                # Admin user intergraion
+│   │   ├── admin.go                # Admin user integration
 │   │   ├── jwt.go                  # JWT generation and authentication
 │   │   └── login.go                # Login (validating credentials)
 │   ├── database
@@ -26,7 +26,7 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 │   ├── members
 │   │   └── members.go              # Members management (invite, accept, decline ..)
 │   ├── projects
-│   │   ├── projects.go             # Project creation and management with committee assignement
+│   │   ├── projects.go             # Project creation and management with committee assignment
 │   │   ├── report.go               # Project report (summary of the project states, incomes, expenses ..)
 │   │   └── transactions.go         # Project transactions tracking (income, expenses, documentations ..)
 │   ├── templates
@@ -39,11 +39,11 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 
 ```
 
-## Local Setup & Infrastracture
+## Local Setup & Infrastructure
 1. Match Your System's Postgres Credentials
-Before doing anything you must ensure that you local PostgreSQL instance actually has a user role that matches you configuration.
+Before doing anything you must ensure that your local PostgreSQL instance actually has a user role that matches your configuration.
 
-⚠️CRITICAL COTCHA: PostgreSQL will not automatically create database users based on your environment file. Whatever value you chose for `DB_USER` must exist as an authorized role in your local cluster, otherwise the connection pool initialzation (`db.Ping()`) will fail with an authentication error.
+⚠️CRITICAL GOTCHA: PostgreSQL will not automatically create database users based on your environment file. Whatever value you chose for `DB_USER` must exist as an authorized role in your local cluster, otherwise the connection pool initialization (`db.Ping()`) will fail with an authentication error.
 If your chosen user doesn't exist, log into your master Postgres instance and provision then manually:
 `CREATE USER "your_chosen_name" WITH PASSWORD 'your_chosen_password' CREATEDB;`
 
@@ -79,7 +79,7 @@ Everything else is abstracted away by the Makefile, Run `make help` (or simply `
 ```
     make all
 ```
-- Hot-reaload Server: Starts the Go backend runtime without touching the database infrastracture.
+- Hot-reload Server: Starts the Go backend runtime without touching the database infrastructure.
 ```
     make server-run
 ```
@@ -93,7 +93,7 @@ Everything else is abstracted away by the Makefile, Run `make help` (or simply `
 ```
 
 ## Relational Database Architecture
-The PostgreSQL relational code handles four distinct operational domains via strict engine constranits and perfomance types:
+The PostgreSQL relational code handles four distinct operational domains via strict engine constraints and performance types:
 - Strict Types: Explicit status and authorization control mapping (`member_role`, `project_status`, `project_roles`, `funding_source`, `transaction_type`, `payment_method`).
 - Cascading Integrity: Key relationships (`project_members`, `project_subscribers`, `membership_payment`) leverage `ON DELETE CASCADE` actions to prevent orphan database rows during operations.
 - Uniqueness Constraints: Enforces clean internal states (e.g., `unique_member_year` prevents duplicate membership fee records for a single member within a single fiscal year cycle).
@@ -116,4 +116,4 @@ Below is the current checklist of requirements and features for this project.
 
 ## Quick Progress Summary
 - Completed: 12 / 13 (92%)
-- Status: In active Development
+- Status: In Active Development
