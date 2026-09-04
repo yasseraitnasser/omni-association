@@ -24,11 +24,11 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 │   │       └── 000_INITIAL.sql     # Base database schemas, types, and constraints
 │   ├── main.go                     # Server orchestration layer & routing table
 │   ├── members
-│   │   └── members.go              # Members management
+│   │   └── members.go              # Members management (invite, accept, decline ..)
 │   ├── projects
-│   │   ├── projects.go             # Project creation and management
-│   │   ├── report.go               # Project report
-│   │   └── transactions.go         # Project transactions
+│   │   ├── projects.go             # Project creation and management with committee assignement
+│   │   ├── report.go               # Project report (summary of the project states, incomes, expenses ..)
+│   │   └── transactions.go         # Project transactions tracking (income, expenses, documentations ..)
 │   ├── templates
 │   │   └── layouts
 │   │       └── layout.html         # Base HTML layout skeleton
