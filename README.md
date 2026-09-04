@@ -57,9 +57,21 @@ DB_HOST=127.0.0.1
 DB_USER=user
 DB_PASS=secretpass
 
-# HTTP Server settings
-PORT=8080
-HOST=localhost
+SERVER_PORT=8080
+SERVER_HOST=localhost
+
+ADMIN_NAME=admin
+ADMIN_EMAIL=adminemail@example.com
+ADMIN_PASS=adminpass123
+
+JWT_SECRET=4d6c669ae283e8b51ba7563009cb90562c4e37e5bef7fca915f4462006e2e72fec0c9db63482f8135f95ac2f96ce3c4ffa9205c4fff263ad94c1147443686d80
+JWT_EXPIRY=24h
+
+SECURE_TOKEN_LENGTH=32
+SECURE_TOKEN_EXPIRY=24h
+
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE=2
 ```
 3. Execution Pipeline (Makefile Execution)
 Everything else is abstracted away by the Makefile, Run `make help` (or simply `make`) to list targets, or use the code workflows below:
