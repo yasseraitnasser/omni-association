@@ -11,16 +11,32 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 ├── Makefile                        # High-level DevOps command abstraction
 ├── README.md                       # Project documentation
 ├── go.mod                          # Go dependency manifest
+├── go.mod                          # cryptographic checksum of module versions
 ├── .env.example                    # Example of local execution configuration
 ├── src
+│   ├── auth
+│   │   ├── admin.go                # Admin user intergraion
+│   │   ├── jwt.go                  # JWT generation and authentication
+│   │   └── login.go                # Login (validating credentials)
 │   ├── database
 │   │   ├── database.go             # Go connection pool init (sql.Open + Ping)
 │   │   └── migrations
 │   │       └── 000_INITIAL.sql     # Base database schemas, types, and constraints
 │   ├── main.go                     # Server orchestration layer & routing table
-│   └── templates
-│       └── layouts
-│           └── layout.html         # Base HTML layout skeleton
+│   ├── members
+│   │   └── members.go              # Members management
+│   ├── projects
+│   │   ├── projects.go             # Project creation and management
+│   │   ├── report.go               # Project report
+│   │   └── transactions.go         # Project transactions
+│   ├── templates
+│   │   └── layouts
+│   │       └── layout.html         # Base HTML layout skeleton
+│   └── utils
+│       ├── env.go                  # Env variables load
+│       ├── password.go             # Password hashing and comparaison
+│       └── validate.go             # Struct validation
+
 ```
 
 ## Local Setup & Infrastracture
