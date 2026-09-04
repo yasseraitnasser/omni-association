@@ -200,6 +200,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid schema", http.StatusBadRequest)
 		return
 	}
+
 	transactionDate, err := time.Parse("2006-01-02", req.TransactionDate)
 	if err != nil {
 		http.Error(w, "Invalid date format: Expected 'YYYY-MM-DD'", http.StatusBadRequest)

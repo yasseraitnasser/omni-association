@@ -51,6 +51,7 @@ func main() {
 	router.HandleFunc("/api/projects", Chain(projects.CreateProject, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/committee", Chain(projects.AssignCommitteeMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/transactions", projects.CreateTransaction).Methods("POST")
+	router.HandleFunc("/api/projects/{id:[0-9]+/report", projects.GetReport).Methods("GET")
 	router.HandleFunc("/", home)
 
 	err = database.InitDB()
