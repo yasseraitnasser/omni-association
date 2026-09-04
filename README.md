@@ -97,3 +97,23 @@ The PostgreSQL relational code handles four distinct operational domains via str
 - Strict Types: Explicit status and authorization control mapping (`member_role`, `project_status`, `project_roles`, `funding_source`, `transaction_type`, `payment_method`).
 - Cascading Integrity: Key relationships (`project_members`, `project_subscribers`, `membership_payment`) leverage `ON DELETE CASCADE` actions to prevent orphan database rows during operations.
 - Uniqueness Constraints: Enforces clean internal states (e.g., `unique_member_year` prevents duplicate membership fee records for a single member within a single fiscal year cycle).
+
+## Project Tasks & Roadmap
+Below is the current checklist of requirements and features for this project.
+- [x] The association's members are: President, Vice-President, Treasurer, Assistant Treasurer, General Secretary, Assistant General Secretary, Advisors, and members.
+- [x] The association's board members are also members.
+- [x] To enable the association to carry out its tasks and small projects, each member pays an annual membership fee based on the results of the general assembly, against a receipt signed and stamped by the association.
+- [x] The association undertakes community projects (drilling wells, building and renovating mosques, widows' and orphans' homes, etc.).
+- [x] The sources of funding for these projects are: association members (their own money or donations), government donations, and donations from other associations.
+- [x] The funding source for some projects is subscriber contributions (each subscriber must pay a fee).
+- [x] Before starting each project, the association's board creates a committee of members who will manage the project from start to finish.
+- [x] On the platform, committee members must be able to enter transactions for each project according to their respective access rights.
+- [x] The committee for each project must enter the amount of each member's donation, the payment receipt, and the supplier invoices.
+- [x] At the end of each project, the committee must present its report to the association members, detailing income and expenses, along with invoices, vouchers, and copies of checks.
+- [x] The association's board members must present their annual report to the subscribers once a year.
+- [x] Every transaction made on the association's bank account must be documented, and a photo of the check or transfer order must be included with the reports.
+- [ ] On the platform, each subscriber will be able to view their history, including their donations, subscription status, and outstanding balances owed to the association.
+
+## Quick Progress Summary
+- Completed: 12 / 13 (92%)
+- Status: In active Development
