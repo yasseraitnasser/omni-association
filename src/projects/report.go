@@ -16,10 +16,15 @@ type TransactionResponse struct {
 }
 
 type ProjectReportResponse struct {
-	ProjectID   int    `json:"project_id"`
-	ProjectName string `json:"project_name"`
-	Status      string `json:"status"`
-	Budget      int    `json:"budget"`
+	ProjectID                 int     `json:"project_id"`
+	ProjectName               string  `json:"project_name"`
+	Status                    string  `json:"status"`
+	Budget                    int     `json:"budget"`
+	TotalIncome               int     `json:"total_income"`
+	TotalExpenses             int     `json:"total_expenses"`
+	RemainingBalance          int     `json:"remaining_balance"`
+	FundingProgressPercentage float64 `json:"funding_progress_percentage"`
+	// Transactions              []TransactionResponse `json:"transactions"`
 }
 
 func GetReport(w http.ResponseWriter, r *http.Request) {
@@ -36,9 +41,17 @@ func GetReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := `SELECT * FROM projects WHERE id = $1`
-	var holder ProjectReportResponse
-	err = database.DB.QueryRow(query, projectID).Scan(&holder)
+	query := `SELECT p.id, p.name, p.description, p.budget, p.status
+	COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) AS total_income,
+	COALESCE(SUM(CASE WHEN t.type = expense' THEN t.amount ELSE 0 END), 0) AS total_expenses,
+	(COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) - 
+	COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)) AS remaining_balance
+	FROM projects p
+	LEFT JOIN transactions t ON p.id = t.project_id
+	WHERE id = $1
+	GROUP BY p.id`
+	var repsone ProjectReportResponse
+	err = database.DB.QueryRow(query, projectID).Scan(&repsone)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "No such project", http.StatusForbidden)
@@ -47,6 +60,8 @@ func GetReport(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
+
+	// TODO: calculate the funding progress percentage
 
 	w.WriteHeader(http.StatusOK)
 }
