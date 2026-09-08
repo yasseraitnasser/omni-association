@@ -172,7 +172,7 @@ func saveTransactionToDB(projectID, committeeID int, proofDocPath, receiptPath s
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	claims := auth.AuthenticateToken(w, r)
 	if claims == nil {
-		// auth.Authenticate already responses according to the error type
+		// auth.AuthenticateToken responds with the appropriate status code
 		return
 	}
 
