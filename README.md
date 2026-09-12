@@ -112,7 +112,7 @@ Below is the current checklist of requirements and features for this project.
 - [x] At the end of each project, the committee must present its report to the association members, detailing income and expenses, along with invoices, vouchers, and copies of checks.
 - [x] The association's board members must present their annual report to the subscribers once a year.
 - [x] Every transaction made on the association's bank account must be documented, and a photo of the check or transfer order must be included with the reports.
-- [ ] On the platform, each subscriber will be able to view their history, including their donations, subscription status, and outstanding balances owed to the association.
+- [x] On the platform, each subscriber will be able to view their history, including their donations, subscription status, and outstanding balances owed to the association.
 
 ## Quick Progress Summary
 - Completed: 12 / 13 (92%)
