@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -45,6 +47,11 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	staticDir := "./src/templates/layouts/static"
+	statisHandler := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
+	router.PathPrefix("/static/").Handler(statisHandler)
+
+	router.HandleFunc("/", home)
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
@@ -53,7 +60,6 @@ func main() {
 	router.HandleFunc("/api/projects/{id:[0-9]+}/transactions", projects.CreateTransaction).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/report", projects.GetReport).Methods("GET")
 	router.HandleFunc("/api/members/me/history", members.GetHistory).Methods("GET")
-	router.HandleFunc("/", home)
 
 	err = database.InitDB()
 	if err != nil {
