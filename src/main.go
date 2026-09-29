@@ -45,9 +45,9 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	staticDir := "./src/templates/layouts/static"
-	statisHandler := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
-	router.PathPrefix("/static/").Handler(statisHandler)
+	staticDir := "./src/templates/layouts/pico-main/css"
+	staticHandler := http.StripPrefix("/pico-main/css/", http.FileServer(http.Dir(staticDir)))
+	router.PathPrefix("/pico-main/css/").Handler(staticHandler)
 
 	router.HandleFunc("/", home)
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
