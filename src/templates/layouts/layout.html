@@ -5,14 +5,22 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="color-scheme" content="light dark">
-	<link rel="stylesheet" href="pico-main/css/pico.amber.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.cyan.min.css">
 	<title>{{.PageTitle}}</title>
 </head>
 
 <body>
 	<main class="container">
-		<h1>{{.PageTitle}}</h1>
-		<button>click me</button>
+		<nav>
+			<ul>
+				<li><strong>Omni-Association</strong></li>
+			</ul>
+			<ul>
+				<li><a href="/">Dashboard</a></li>
+				<li><a href="/projects">Projects</a></li>
+				<li><a href="/logout" class="secondary">Logout</a></li>
+			</ul>
+		</nav>
 	</main>
 </body>
 

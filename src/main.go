@@ -25,7 +25,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("Error parsing layout.html")
 	}
 	data := Data{
-		PageTitle: "omni-association",
+		PageTitle: "Omni-Association",
 	}
 	tmpl.Execute(w, data)
 }
