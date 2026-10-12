@@ -20,9 +20,12 @@ type Data struct {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("src/templates/layouts/layout.html")
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/home.html",
+	)
 	if err != nil {
-		log.Fatal("Error parsing layout.html")
+		log.Fatal("Error parsing html files")
 	}
 	data := Data{
 		PageTitle: "Omni-Association",
