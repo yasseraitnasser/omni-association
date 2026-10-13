@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -47,6 +48,48 @@ func loginPageHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+type DashboardData struct {
+	PageTitle      string
+	AssociationFee int
+	Member         struct {
+		Name         string
+		Role         string
+		CreatedAt    time.Time
+		TotalPaid    int
+		ProjectCount int
+	}
+	History []struct {
+		Year       int
+		AmountPaid int
+		ReceiptURL string
+		PaidAt     time.Time
+	}
+}
+
+func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/dashboard.html",
+	)
+	if err != nil {
+		log.Fatal("Error parsing html files")
+	}
+	data := DashboardData{
+		PageTitle:      "Omni-Association",
+		AssociationFee: 500,
+		Member: struct {
+			Name         string
+			Role         string
+			CreatedAt    time.Time
+			TotalPaid    int
+			ProjectCount int
+		}{
+			Name: "Yasser",
+		},
+	}
+	tmpl.Execute(w, data)
+}
+
 func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		f = middlewares[i](f)
@@ -67,6 +110,7 @@ func main() {
 	router.PathPrefix("/pico-main/css/").Handler(staticHandler)
 
 	router.HandleFunc("/", home).Methods("GET")
+	router.HandleFunc("/dashboard", dashboardHandler).Methods("GET")
 	router.HandleFunc("/login", loginPageHandler).Methods("GET")
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
