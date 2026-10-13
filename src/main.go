@@ -33,6 +33,20 @@ func home(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
+func loginPageHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/login.html",
+	)
+	if err != nil {
+		log.Fatal("Error parsing html files")
+	}
+	data := Data{
+		PageTitle: "Omni-Association",
+	}
+	tmpl.Execute(w, data)
+}
+
 func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		f = middlewares[i](f)
@@ -52,7 +66,8 @@ func main() {
 	staticHandler := http.StripPrefix("/pico-main/css/", http.FileServer(http.Dir(staticDir)))
 	router.PathPrefix("/pico-main/css/").Handler(staticHandler)
 
-	router.HandleFunc("/", home)
+	router.HandleFunc("/", home).Methods("GET")
+	router.HandleFunc("/login", loginPageHandler).Methods("GET")
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
