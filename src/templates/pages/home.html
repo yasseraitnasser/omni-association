@@ -1,2 +1,28 @@
 {{ define "content" }}
+<section>
+	<div class="grid">
+		<div>
+			<h1>{{ .PageTitle }}</h1>
+			<p class="subtitle">Streamline membership tracking, project management, and transparent
+				financial reporting for our community.</p>
+
+			<p style="margin-top: 2rem;">
+				<a href="/login" role="button">Login to Portal</a>
+				<a href="/projects" role="button" class="secondary outline"
+					style="margin-left: 0.5rem;">Browse Projects</a>
+			</p>
+		</div>
+		<div>
+			<article>
+				<header><strong>Core Features</strong></header>
+				<ul>
+					<li>Membership Dues & Receipt Verification</li>
+					<li>Project Committee Collaboration</li>
+					<li>Income & Expense Transaction Tracking</li>
+					<li>Transaparent Financial Reports</li>
+				</ul>
+			</article>
+		</div>
+	</div>
+</section>
 {{ end }}
