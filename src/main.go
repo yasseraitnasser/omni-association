@@ -78,6 +78,7 @@ func main() {
 	router.HandleFunc("/", home).Methods("GET")
 	router.HandleFunc("/dashboard", dashboardHandler).Methods("GET")
 	router.HandleFunc("/login", auth.LoginPageHandler).Methods("GET")
+	router.HandleFunc("/logout", auth.LogoutHandler).Methods("GET")
 	router.HandleFunc("/projects", projects.ProjectsPageHandler).Methods("GET")
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
