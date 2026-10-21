@@ -16,9 +16,6 @@ import (
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
-type Data struct {
-	PageTitle string
-}
 
 func home(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles(
@@ -28,42 +25,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("Error parsing html files")
 	}
-	data := Data{
+	data := utils.Data{
 		PageTitle: "Omni-Association",
 	}
 	tmpl.Execute(w, data)
-}
-
-func loginPageHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(
-		"src/templates/layouts/layout.html",
-		"src/templates/pages/login.html",
-	)
-	if err != nil {
-		log.Fatal("Error parsing html files")
-	}
-	data := Data{
-		PageTitle: "Omni-Association",
-	}
-	tmpl.Execute(w, data)
-}
-
-type DashboardData struct {
-	PageTitle      string
-	AssociationFee int
-	Member         struct {
-		Name         string
-		Role         string
-		CreatedAt    time.Time
-		TotalPaid    int
-		ProjectCount int
-	}
-	History []struct {
-		Year       int
-		AmountPaid int
-		ReceiptURL string
-		PaidAt     time.Time
-	}
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +39,8 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("Error parsing html files")
 	}
-	data := DashboardData{
+
+	data := utils.DashboardData{
 		PageTitle:      "Omni-Association",
 		AssociationFee: 500,
 		Member: struct {
@@ -86,21 +52,6 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 		}{
 			Name: "Yasser",
 		},
-	}
-	tmpl.Execute(w, data)
-}
-
-func projectsPageHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles(
-		"src/templates/layouts/layout.html",
-		"src/templates/pages/projects.html",
-	)
-	if err != nil {
-		log.Fatal("Error parsing html files")
-	}
-
-	data := Data{
-		PageTitle: "Omni-Association",
 	}
 	tmpl.Execute(w, data)
 }
@@ -126,8 +77,8 @@ func main() {
 
 	router.HandleFunc("/", home).Methods("GET")
 	router.HandleFunc("/dashboard", dashboardHandler).Methods("GET")
-	router.HandleFunc("/login", loginPageHandler).Methods("GET")
-	router.HandleFunc("/projects", projectsPageHandler).Methods("GET")
+	router.HandleFunc("/login", auth.LoginPageHandler).Methods("GET")
+	router.HandleFunc("/projects", projects.ProjectsPageHandler).Methods("GET")
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
