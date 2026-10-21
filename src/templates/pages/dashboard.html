@@ -1,0 +1,78 @@
+{{ define "content" }}
+<section style="display: 90%;">
+	<!-- Welcome Header & Quick Action -->
+	<div class="grid">
+		<div>
+			<h2>Welcome, {{ .Member.Name }}</h2>
+			<p><mark>{{ .Member.Role }}</mark> • Joined {{ .Member.CreatedAt.Format "Jan 2006" }}</p>
+		</div>
+		<div style="text-align: right;">
+			<!-- Simple status badge using Pico inline typography -->
+			<p><strong>Membership Status:</strong> <ins>Active (2026 Paid)</ins></p>
+		</div>
+	</div>
+
+	<hr />
+
+	<div class="grid">
+		<article>
+			<header><small>Annual Dues Paid</small></header>
+			<h3>{{ .Member.TotalPaid }} MAD</h3>
+			<footer><small>Current Year: {{ .AssociationFee }} MAD</small></footer>
+		</article>
+
+		<article>
+			<header><small>Active Projects</small></header>
+			<h3>{{ .Member.ProjectCount }}</h3>
+			<footer><small>Assigned Committees</small></footer>
+		</article>
+
+		<article>
+			<header><small>Next Renewal</small></header>
+			<h3>Dec 31, 2026</h3>
+			<footer><small>Status: Up to date</small></footer>
+		</article>
+	</div>
+
+	<br />
+
+	<!-- Personal Activity & Payment History -->
+	<h3>Payment & Activity History</h3>
+
+	{{ if .History }}
+	<div class="overflow-auto">
+		<table class="striped">
+			<thead>
+				<tr>
+					<th scope="col">Year</th>
+					<th scope="col">Amount Paid</th>
+					<th scope="col">Paid Date</th>
+					<th scope="col">Receipt</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range .History }}
+				<tr>
+					<td><strong>{{ .Year }}</strong></td>
+					<td>{{ .AmountPaid }} MAD</td>
+					<td>{{ .PaidAt.Format "2006-01-02" }}</td>
+					<td>
+						<a href="{{ .ReceiptURL }}" target="_blank" role="button"
+							class="outline secondary contrast"
+							style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+							View Receipt 📄
+						</a>
+					</td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
+	{{ else }}
+	<article>
+		<p><em>No payment history found for your account.</em></p>
+	</article>
+	{{ end }}
+
+</section>
+{{ end }}

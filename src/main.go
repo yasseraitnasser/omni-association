@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -15,17 +16,42 @@ import (
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
-type Data struct {
-	PageTitle string
-}
 
 func home(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("src/templates/layouts/layout.html")
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/home.html",
+	)
 	if err != nil {
-		log.Fatal("Error parsing layout.html")
+		log.Fatal("Error parsing html files")
 	}
-	data := Data{
-		PageTitle: "omni-association",
+	data := utils.Data{
+		PageTitle: "Omni-Association",
+	}
+	tmpl.Execute(w, data)
+}
+
+func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/dashboard.html",
+	)
+	if err != nil {
+		log.Fatal("Error parsing html files")
+	}
+
+	data := utils.DashboardData{
+		PageTitle:      "Omni-Association",
+		AssociationFee: 500,
+		Member: struct {
+			Name         string
+			Role         string
+			CreatedAt    time.Time
+			TotalPaid    int
+			ProjectCount int
+		}{
+			Name: "Yasser",
+		},
 	}
 	tmpl.Execute(w, data)
 }
@@ -45,6 +71,14 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	staticDir := "./src/templates/layouts/pico-main/css"
+	staticHandler := http.StripPrefix("/pico-main/css/", http.FileServer(http.Dir(staticDir)))
+	router.PathPrefix("/pico-main/css/").Handler(staticHandler)
+
+	router.HandleFunc("/", home).Methods("GET")
+	router.HandleFunc("/dashboard", dashboardHandler).Methods("GET")
+	router.HandleFunc("/login", auth.LoginPageHandler).Methods("GET")
+	router.HandleFunc("/projects", projects.ProjectsPageHandler).Methods("GET")
 	router.HandleFunc("/login", (auth.Login)).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
@@ -53,7 +87,6 @@ func main() {
 	router.HandleFunc("/api/projects/{id:[0-9]+}/transactions", projects.CreateTransaction).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/report", projects.GetReport).Methods("GET")
 	router.HandleFunc("/api/members/me/history", members.GetHistory).Methods("GET")
-	router.HandleFunc("/", home)
 
 	err = database.InitDB()
 	if err != nil {

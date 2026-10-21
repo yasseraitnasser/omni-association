@@ -1,3 +1,29 @@
-<h1>{{.PageTitle}}</h1>
-<ul>
-</ul>
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.cyan.min.css">
+	<title>{{.PageTitle}}</title>
+</head>
+
+<body>
+	<main class="container">
+		<nav>
+			<ul>
+				<!-- TODO: add an icone that forwards to home page/dashboard on click-->
+				<li><strong><a href="/">{{.PageTitle}}</a></strong></li>
+			</ul>
+			<ul>
+				<li><a href="/dashboard">Dashboard</a></li>
+				<li><a href="/projects">Projects</a></li>
+				<li><a href="/logout" class="secondary">Logout</a></li>
+			</ul>
+		</nav>
+		{{ template "content" . }}
+	</main>
+</body>
+
+</html>

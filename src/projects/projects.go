@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -146,4 +147,19 @@ func AssignCommitteeMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/projects.html",
+	)
+	if err != nil {
+		log.Fatal("Error parsing html files")
+	}
+
+	data := utils.Data{
+		PageTitle: "Omni-Association",
+	}
+	tmpl.Execute(w, data)
 }

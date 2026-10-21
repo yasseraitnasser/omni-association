@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -64,4 +65,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := map[string]string{"token": token}
 	json.NewEncoder(w).Encode(response)
+}
+
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/login.html",
+	)
+	if err != nil {
+		log.Fatal("Error parsing html files")
+	}
+	data := utils.Data{
+		PageTitle: "Omni-Association",
+	}
+	tmpl.Execute(w, data)
 }

@@ -1,0 +1,60 @@
+{{ define "content" }}
+<section>
+	<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+		<h2>Projects</h2>
+	</div>
+
+	<details style="margin-bottom: 2rem;">
+		<summary role="button" class="outline">Create a New Project +</summary>
+		<article>
+			<form action="/api/projects" method="POST">
+				<div class="grid">
+					<div>
+						<label for="name">Project Name</label>
+						<input type="text" id="name" name="name" required
+							placeholder="e.g., Community Solar Initiative">
+					</div>
+					<div>
+						<label for="budget">Initial Budget (MAD)</label>
+						<input type="number" id="budget" name="budget" value="0" required>
+					</div>
+				</div>
+
+				<label for="description">Description</label>
+				<textarea id="description" name="description" rows="3" required
+					placeholder="Describe the objectives and scope..."></textarea>
+
+				<button type="submit">Save & Create Project</button>
+			</form>
+		</article>
+	</details>
+
+	<div class="grid">
+		{{ range .Projects }}
+		<article>
+			<header>
+				<div style="display: flex; justify-content: space-between; align-items: center;">
+					<strong>{{ .Name }}</strong>
+					<small><mark>{{ .Status }}</mark></small>
+				</div>
+			</header>
+
+			<p>{{ .Description }}</p>
+
+			<footer>
+				<div style="display: flex; justify-content: space-between; align-items: center;">
+					<small><strong>Budget:</strong> {{ .Budget }} MAD</small>
+					<a href="/projects/{{ .ID }}" role="button" class="secondary"
+						style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">Details -></a>
+				</div>
+			</footer>
+		</article>
+		{{ else }}
+		<article style="grid-column: span 3;">
+			<p style="text-align: center; margin: 0;"><em>No projectes registered yet. Use the button above
+					to create one!></em></p>
+		</article>
+		{{ end }}
+	</div>
+</section>
+{{ end }}
