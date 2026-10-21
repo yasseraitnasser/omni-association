@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/yasseraitnasser/omni-association/src/auth"
@@ -32,6 +34,27 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("omni_token")
+	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	tokenString := cookie.Value
+	claims := &utils.Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (any, error) {
+		return []byte(utils.JWT_SECRET), nil
+	})
+	if err != nil || !token.Valid {
+		log.Print("Unauthorized: Invalid or expired token")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
 	tmpl, err := template.ParseFiles(
 		"src/templates/layouts/layout.html",
 		"src/templates/pages/dashboard.html",
@@ -50,7 +73,7 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 			TotalPaid    int
 			ProjectCount int
 		}{
-			Name: "Yasser",
+			Name: claims.Name,
 		},
 	}
 	tmpl.Execute(w, data)

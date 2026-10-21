@@ -1,6 +1,9 @@
 package utils
 
-import "time"
+import (
+	"github.com/golang-jwt/jwt/v5"
+	"time"
+)
 
 type Data struct {
 	PageTitle string
@@ -22,4 +25,11 @@ type DashboardData struct {
 		ReceiptURL string
 		PaidAt     time.Time
 	}
+}
+
+type Claims struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Role string `json:"role"`
+	jwt.RegisteredClaims
 }

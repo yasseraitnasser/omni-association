@@ -10,19 +10,12 @@ import (
 	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
-type Claims struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Role string `json:"role"`
-	jwt.RegisteredClaims
-}
-
 func generateAccessToken(id int, name string, role string) (string, error) {
 	duration, err := time.ParseDuration(utils.JWT_EXPIRY)
 	if err != nil {
 		return "", fmt.Errorf("Invalid JWT_EXPIRY format: %v", err)
 	}
-	claims := Claims{
+	claims := utils.Claims{
 		ID:   id,
 		Name: name,
 		Role: role,
@@ -36,7 +29,7 @@ func generateAccessToken(id int, name string, role string) (string, error) {
 	return token.SignedString([]byte(utils.JWT_SECRET))
 }
 
-func AuthenticateToken(w http.ResponseWriter, r *http.Request) *Claims {
+func AuthenticateToken(w http.ResponseWriter, r *http.Request) *utils.Claims { // WARN: useless??
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Unauthorized: No token provided", http.StatusUnauthorized)
@@ -50,7 +43,7 @@ func AuthenticateToken(w http.ResponseWriter, r *http.Request) *Claims {
 	}
 	tokenString := parts[1]
 
-	claims := &Claims{}
+	claims := &utils.Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (any, error) {
 		return []byte(utils.JWT_SECRET), nil
 	})
