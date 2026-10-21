@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/yasseraitnasser/omni-association/src/database"
 	"github.com/yasseraitnasser/omni-association/src/utils"
@@ -20,14 +20,17 @@ func ValidateLoginSchema(req LoginSchema) error {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	var req LoginSchema
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	err = ValidateLoginSchema(req)
+	req := LoginSchema{
+		Email:    r.PostFormValue("email"),
+		Password: r.PostFormValue("password"),
+	}
+
+	err := ValidateLoginSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid Schema", http.StatusUnprocessableEntity)
 		return
@@ -62,9 +65,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	response := map[string]string{"token": token}
-	json.NewEncoder(w).Encode(response)
+	maxAgeInHours, err := time.ParseDuration(utils.JWT_EXPIRY)
+	if err != nil {
+		http.Error(w, "Internal Server ERROR", http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     utils.TOKEN_NAME,
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, // WARN: requires HTTPS, temporarily set to false for local dev
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(maxAgeInHours.Hours()) * 3600,
+	})
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
 func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
