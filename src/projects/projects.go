@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/lib/pq"
+	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
 	"github.com/yasseraitnasser/omni-association/src/utils"
 )
@@ -150,6 +151,11 @@ func AssignCommitteeMember(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
+	_, err := auth.AuthenticateToken(w, r)
+	if err != nil {
+		return
+	}
+
 	tmpl, err := template.ParseFiles(
 		"src/templates/layouts/layout.html",
 		"src/templates/pages/projects.html",
