@@ -26,8 +26,8 @@ type ProjectReportResponse struct {
 }
 
 func GetReport(w http.ResponseWriter, r *http.Request) {
-	claims := auth.AuthenticateToken(w, r)
-	if claims == nil {
+	_, err := auth.AuthenticateToken(w, r)
+	if err != nil {
 		// auth.AuthenticateToken responds with the appropriate status code
 		return
 	}

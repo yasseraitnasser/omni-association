@@ -23,8 +23,8 @@ type GetHistoryResponse struct {
 }
 
 func GetHistory(w http.ResponseWriter, r *http.Request) {
-	claims := auth.AuthenticateToken(w, r)
-	if claims == nil {
+	claims, err := auth.AuthenticateToken(w, r)
+	if err != nil {
 		// auth.AuthenticateToken responds with the appropriate status code
 		return
 	}

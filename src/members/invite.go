@@ -26,8 +26,8 @@ type InviteResponseSchema struct {
 
 func IsBoardMember(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		claims := auth.AuthenticateToken(w, r)
-		if claims == nil {
+		claims, err := auth.AuthenticateToken(w, r)
+		if err != nil {
 			return
 		}
 

@@ -1,9 +1,10 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,27 +30,26 @@ func generateAccessToken(id int, name string, role string) (string, error) {
 	return token.SignedString([]byte(utils.JWT_SECRET))
 }
 
-func AuthenticateToken(w http.ResponseWriter, r *http.Request) *utils.Claims { // WARN: useless??
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		http.Error(w, "Unauthorized: No token provided", http.StatusUnauthorized)
-		return nil
+func AuthenticateToken(w http.ResponseWriter, r *http.Request) (*utils.Claims, error) {
+	cookie, err := r.Cookie(utils.TOKEN_NAME)
+	if err != nil {
+		if errors.Is(err, http.ErrNoCookie) {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return nil, err
+		}
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return nil, err
 	}
 
-	parts := strings.SplitAfterN(authHeader, " ", 2) // NOTE: <=> strings.Split(authHeader, " ")
-	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer " {
-		http.Error(w, "Unauthorized: Malformed authorization header", http.StatusUnauthorized)
-		return nil
-	}
-	tokenString := parts[1]
-
+	tokenString := cookie.Value
 	claims := &utils.Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (any, error) {
 		return []byte(utils.JWT_SECRET), nil
 	})
 	if err != nil || !token.Valid {
-		http.Error(w, "Unauthorized: Invalid or expired token", http.StatusUnauthorized)
-		return nil
+		log.Print("Unauthorized: Invalid or expired token")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return nil, err
 	}
-	return claims
+	return claims, nil
 }

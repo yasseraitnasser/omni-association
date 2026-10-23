@@ -170,8 +170,8 @@ func saveTransactionToDB(projectID, committeeID int, proofDocPath, receiptPath s
 }
 
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
-	claims := auth.AuthenticateToken(w, r)
-	if claims == nil {
+	claims, err := auth.AuthenticateToken(w, r)
+	if err != nil {
 		// auth.AuthenticateToken responds with the appropriate status code
 		return
 	}
@@ -195,7 +195,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.sanitize()
-	err := validateTransactionCreationSchema(req)
+	err = validateTransactionCreationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid schema", http.StatusBadRequest)
 		return
