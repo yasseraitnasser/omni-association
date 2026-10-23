@@ -5,7 +5,9 @@
 - [x] add logout
 - [x] serve dashboard for authenticated users only
 - [x] in the dashboard page, in the greeting, use the username instead of default it to yasser
-- [ ] forward to the page the user requested instead of dashboard???
-- [ ] move admin.go file to another directory (it has nothing to do with auth)
+- [x] prompt the user to retry if the email or password are invalid
 - [ ] serve projects for authenticated users only
-- [ ] forward back /login after checking the password is false
+- [ ] forward to the page the user requested instead of dashboard???
+- [ ] login instead of logout for non authenticated users
+- [ ] move admin.go file to another directory (it has nothing to do with auth)
+- [ ] use a dummy hash for password comparaison

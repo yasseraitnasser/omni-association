@@ -3,10 +3,16 @@
 	<article style="max-width: 420px; margin-inline: auto;">
 		<form action="/login" method="POST">
 			<label for="email">Email</label>
-			<input style="max-height: 50px;" type="email" id="email" name="email" required>
+			<input style="max-height: 50px;" type="email" id="email" name="email" value="{{ .Email }}"
+				required {{ if .Error }} aria-invalid="true" aria-describedby="login-error" {{ end }}>
 
 			<label for="password">Password</label>
-			<input style="max-height: 50px;" type="password" id="password" name="password" required>
+			<input style="max-height: 50px;" type="password" id="password" name="password" minlength="12"
+				required {{ if .Error }}aria-invalid="true" aria-describedby="login-error" {{ end }}>
+
+			{{ if .Error }}
+			<small id="login-error" role="alert">{{ .Error }}</small>
+			{{ end }}
 
 			<button type="submit">Login</button>
 		</form>
