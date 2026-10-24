@@ -10,13 +10,17 @@
 			<form action="/api/projects" method="POST">
 				<div class="grid">
 					<div>
-						<label for="name">Project Name</label>
-						<input type="text" id="name" name="name" required
+						<label for="project_name">Project Name</label>
+						<input type="text" id="project_name" name="project_name" required
 							placeholder="e.g., Community Solar Initiative">
 					</div>
 					<div>
 						<label for="budget">Initial Budget (MAD)</label>
 						<input type="number" id="budget" name="budget" value="0" required>
+					</div>
+					<div>
+						<label for="leader_id">Project Leader ID</label>
+						<input type="number" id="leader_id" name="leader_id" value="0" required>
 					</div>
 				</div>
 

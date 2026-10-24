@@ -41,9 +41,6 @@ func renderLoginError(w http.ResponseWriter, r *http.Request, email string) {
 		Error:     "Invalid email or password.",
 		Email:     email,
 	}
-	log.Print(data.PageTitle)
-	log.Print(data.Email)
-	log.Print(data.Error)
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Printf("template execute error: %v", err)
 	}

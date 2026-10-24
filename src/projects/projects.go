@@ -61,15 +61,47 @@ func saveProjectToDB(projectName, descrption string, leaderID, budget int) error
 	return nil
 }
 
-func CreateProject(w http.ResponseWriter, r *http.Request) {
-	var req CreateProjectSchema
-	var err = json.NewDecoder(r.Body).Decode(&req)
+func parse_atoi(str string, w http.ResponseWriter) (int, error) {
+	integer, err := strconv.Atoi(str)
 	if err != nil {
+		log.Print(err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return 0, err
+	}
+
+	if integer < 0 {
+		log.Print(err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return 0, err
+	}
+
+	return integer, nil
+}
+
+func CreateProject(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		log.Print(err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	err = validateProjectCreationSchema(req)
+	LeaderID_str := r.PostFormValue("leader_id")
+	Budget_str := r.PostFormValue("budget")
+
+	LeaderID_int, LeaderID_err := parse_atoi(LeaderID_str, w)
+	Budget_int, Budget_err := parse_atoi(Budget_str, w)
+	if LeaderID_err != nil || Budget_err != nil {
+		return // response has already been made
+	}
+
+	req := CreateProjectSchema{
+		ProjectName: r.PostFormValue("project_name"),
+		Description: r.PostFormValue("description"),
+		LeaderID:    LeaderID_int,
+		Budget:      Budget_int,
+	}
+
+	err := validateProjectCreationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid Schema", http.StatusBadRequest)
 		return
@@ -93,7 +125,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	http.Redirect(w, r, "/projects", http.StatusSeeOther)
 }
 
 type AssignCommitteeSchema struct {
