@@ -188,16 +188,27 @@ func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ProjectsList, err := GetProjects()
+	if err != nil {
+		log.Printf("Error querying projects: %v\n", err)
+		http.Error(w, "Failed to load projects", http.StatusInternalServerError)
+		return
+	}
+
 	tmpl, err := template.ParseFiles(
 		"src/templates/layouts/layout.html",
 		"src/templates/pages/projects.html",
 	)
 	if err != nil {
-		log.Fatal("Error parsing html files")
+		log.Printf("Error parsing templates: %v\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
-	data := utils.Data{
+	data := ProjectsPageData{
 		PageTitle: "Omni-Association",
+		Projects:  ProjectsList,
 	}
+
 	tmpl.Execute(w, data)
 }

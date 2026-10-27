@@ -33,7 +33,7 @@
 		</article>
 	</details>
 
-	<div class="grid">
+	<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
 		{{ range .Projects }}
 		<article>
 			<header>
@@ -43,19 +43,22 @@
 				</div>
 			</header>
 
-			<p>{{ .Description }}</p>
+			<p
+				style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 4.5em;">
+				{{ .Description }}
+			</p>
 
 			<footer>
 				<div style="display: flex; justify-content: space-between; align-items: center;">
 					<small><strong>Budget:</strong> {{ .Budget }} MAD</small>
 					<a href="/projects/{{ .ID }}" role="button" class="secondary"
-						style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">Details -></a>
+						style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">Details &rarr;</a>
 				</div>
 			</footer>
 		</article>
-		{{ else }}
+		{{ else }} <!-- TODO: test having no projects -->
 		<article style="grid-column: span 3;">
-			<p style="text-align: center; margin: 0;"><em>No projectes registered yet. Use the button above
+			<p style="text-align: center; margin: 0;"><em>No projects registered yet. Use the button above
 					to create one!></em></p>
 		</article>
 		{{ end }}
