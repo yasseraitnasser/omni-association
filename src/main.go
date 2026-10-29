@@ -1,13 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/yasseraitnasser/omni-association/src/auth"
@@ -33,25 +34,99 @@ func home(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-func dashboardHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("omni_token")
-	if err != nil {
-		if errors.Is(err, http.ErrNoCookie) {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+func getMemberData(w http.ResponseWriter, claims *utils.Claims) (utils.Member, error) {
+	query := `SELECT name, role, created_at FROM members WHERE id = $1`
+	var member utils.Member
 
-	tokenString := cookie.Value
-	claims := &utils.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (any, error) {
-		return []byte(utils.JWT_SECRET), nil
-	})
-	if err != nil || !token.Valid {
-		log.Print("Unauthorized: Invalid or expired token")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	err := database.DB.QueryRow(query, claims.ID).Scan(&member.Name, &member.Role, &member.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "No such member", http.StatusForbidden)
+			return member, err
+		}
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return member, err
+	}
+	return member, nil
+}
+
+type MembershipPayment struct {
+	MemberID   int
+	AmountPaid int
+	Year       int
+	PaidAt     time.Time
+}
+
+func getMembershipPaymentsData(w http.ResponseWriter, claims *utils.Claims, member *utils.Member) error {
+	query := `SELECT member_id, amount_paid, year, paid_at FROM membership_payments WHERE member_id = $1`
+	rows, err := database.DB.Query(query, claims.ID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "No such member", http.StatusForbidden)
+			return err
+		}
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return err
+	}
+	defer rows.Close()
+
+	member.TotalPaid = 0
+	member.MembershipStatus = "Inactive"
+	for rows.Next() {
+		var mp MembershipPayment
+		if err := rows.Scan(&mp.MemberID, &mp.AmountPaid, &mp.Year, &mp.PaidAt); err != nil {
+			log.Printf("Error scanning membership payments: %v\n", err)
+			http.Error(w, "Failed to load membership payments", http.StatusInternalServerError)
+			return err
+		}
+
+		member.TotalPaid += mp.AmountPaid
+
+		if mp.Year == time.Now().Year() {
+			member.MembershipStatus = fmt.Sprintf("Active (%d Paid)", mp.Year)
+		}
+	}
+	return nil
+}
+
+func getAssociationFee(w http.ResponseWriter) (int, error) {
+	query := `SELECT current_fee FROM association WHERE id = $1`
+	var associationFee int
+	err := database.DB.QueryRow(query, 3).Scan(&associationFee)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "No such association", http.StatusForbidden)
+			return 0, err
+		}
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return 0, err
+	}
+	return associationFee, nil
+}
+
+func getProjectCount(w http.ResponseWriter) (int, error) {
+	query := `SELECT id FROM projects`
+	projectCount := 0
+	rows, err := database.DB.Query(query)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "No such association", http.StatusForbidden)
+			return 0, err
+		}
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return 0, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		projectCount++
+	}
+	return projectCount, nil
+}
+
+func dashboardHandler(w http.ResponseWriter, r *http.Request) {
+	claims, err := auth.AuthenticateToken(w, r)
+	if err != nil {
 		return
 	}
 
@@ -60,21 +135,36 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 		"src/templates/pages/dashboard.html",
 	)
 	if err != nil {
-		log.Fatal("Error parsing html files")
+		log.Printf("Error parsing templates: %v\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	member, err := getMemberData(w, claims)
+	if err != nil {
+		return
+	}
+
+	err = getMembershipPaymentsData(w, claims, &member)
+	if err != nil {
+		return
+	}
+
+	associationFee, err := getAssociationFee(w)
+	if err != nil {
+		return
+	}
+
+	projectCount, err := getProjectCount(w)
+	if err != nil {
+		return
 	}
 
 	data := utils.DashboardData{
 		PageTitle:      "Omni-Association",
-		AssociationFee: 500,
-		Member: struct {
-			Name         string
-			Role         string
-			CreatedAt    time.Time
-			TotalPaid    int
-			ProjectCount int
-		}{
-			Name: claims.Name,
-		},
+		AssociationFee: associationFee,
+		ProjectCount:   projectCount,
+		Member:         member,
 	}
 	tmpl.Execute(w, data)
 }
@@ -84,6 +174,38 @@ func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
 		f = middlewares[i](f)
 	}
 	return f
+}
+
+func RegisterMembershipPayment(w http.ResponseWriter, r *http.Request) {
+	query := `INSERT INTO membership_payments (member_id, amount_paid, year, receipt_url, paid_at) VALUES ($1, $2, $3, $4, $5)`
+	memberID := 1
+	amountPaid := 500
+	year := 2026
+	receiptURL := `0fbfd28dc5da_landscape-forest-photography-trees-wallpaper-preview.jpg`
+	paid_at := time.Now()
+
+	result, err := database.DB.Exec(query, memberID, amountPaid, year, receiptURL, paid_at)
+	if err != nil {
+		log.Printf("Error inerting membership_payments %v\n", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	insertedRowID, err := result.LastInsertId()
+	fmt.Fprintf(w, "Successfully inserted %d", insertedRowID)
+}
+
+func createAssociation() {
+	query := `INSERT INTO association (name, current_fee) VALUES ($1, $2)`
+	name := "Omni-Association"
+	currentFee := 0
+
+	_, err := database.DB.Exec(query, name, currentFee)
+	if err != nil {
+		log.Fatalf("Error inerting membership_payments %v\n", err)
+	}
+
+	log.Printf("Successfully inserted %s into the database", name)
 }
 
 func main() {
@@ -112,7 +234,9 @@ func main() {
 	router.HandleFunc("/api/projects", Chain(projects.CreateProject, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/committee", Chain(projects.AssignCommitteeMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/transactions", projects.CreateTransaction).Methods("POST")
-	// router.HandleFunc("/api/projects/{id:[0-9]+}/report", projects.GetReport).Methods("GET") TODO: implement project details handler
+	// router.HandleFunc("/api/projects/{id:[0-9]+}/report", projects.GetProjectDetails).Methods("GET") TODO: implement project details handler
+
+	router.HandleFunc("/api/membership_payment", RegisterMembershipPayment).Methods("POST")
 
 	router.HandleFunc("/api/members/me/history", members.GetHistory).Methods("GET")
 
@@ -121,6 +245,8 @@ func main() {
 		log.Fatalf("Could not connect to the database: %v", err)
 	}
 	defer database.DB.Close()
+
+	createAssociation() // FIX: do NOT insert everytime the server launches
 
 	auth.AddAdminUser()
 	utils.InitValidator()

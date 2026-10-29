@@ -29,7 +29,7 @@ type ProjectsPageData struct {
 	Projects  []Project
 }
 
-func GetReportReport(w http.ResponseWriter, r *http.Request) {
+func GetProjectdetails(w http.ResponseWriter, r *http.Request) {
 	_, err := auth.AuthenticateToken(w, r)
 	if err != nil {
 		// auth.AuthenticateToken responds with the appropriate status code
