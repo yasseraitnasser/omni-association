@@ -223,6 +223,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Not a committee member for this project", http.StatusForbidden)
 			return
 		}
+		log.Printf("%v\n", err)
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}

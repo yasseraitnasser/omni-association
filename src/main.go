@@ -28,6 +28,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("Error parsing html files")
 	}
+
 	data := utils.Data{
 		PageTitle: "Omni-Association",
 	}
@@ -238,7 +239,7 @@ func main() {
 
 	router.HandleFunc("/api/membership_payment", RegisterMembershipPayment).Methods("POST")
 
-	router.HandleFunc("/api/members/me/history", members.GetHistory).Methods("GET")
+	router.HandleFunc("/api/members/{id:[0-9]+}/history", members.GetMemberHistory).Methods("GET")
 
 	err = database.InitDB()
 	if err != nil {

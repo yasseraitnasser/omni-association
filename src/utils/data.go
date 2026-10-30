@@ -10,7 +10,9 @@ type Data struct {
 }
 
 type Member struct {
+	ID               int
 	Name             string
+	Email            string
 	Role             string
 	CreatedAt        time.Time
 	MembershipStatus string
