@@ -44,3 +44,16 @@ type Claims struct {
 	Role string `json:"role"`
 	jwt.RegisteredClaims
 }
+
+type Project struct {
+	ID                        int
+	Name                      string
+	Description               string
+	Status                    string
+	Budget                    int
+	TotalIncome               int
+	TotalExpenses             int
+	RemainingBalance          int
+	FundingProgressPercentage float64
+	CreatedAt                 time.Time
+}

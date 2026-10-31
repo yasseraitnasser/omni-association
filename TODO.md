@@ -13,7 +13,10 @@
 - [x] fill the served pages with actual data from DB instead of dummy data
 - [x] add a page that enables the user to see his contributions, donations ..etc
 - [ ] add a button to delete a project(in the project full description page)
+- [ ] add a button to assign committee to project
 - [ ] add a button to initiate a transaction
+- [ ] net balance in the project details page
+- [ ] respond with files when proofs are requested
 - [ ] remove "create a new project+" for non board members
 - [ ] check for TODOs, FIXs, WARNs ..etc
 - [ ] set a max length for project name (in both backend and frontend)
