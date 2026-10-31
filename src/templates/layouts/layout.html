@@ -13,13 +13,17 @@
 	<main class="container">
 		<nav>
 			<ul>
-				<!-- TODO: add an icone that forwards to home page/dashboard on click-->
 				<li><strong><a href="/">{{.PageTitle}}</a></strong></li>
 			</ul>
 			<ul>
 				<li><a href="/dashboard">Dashboard</a></li>
 				<li><a href="/projects">Projects</a></li>
+				{{ if .IsAuthenticated }}
+				<li><a href="/api/members/{{ .AuthenticatedUserID }}/history">Profile</a></li>
 				<li><a href="/logout" class="secondary">Logout</a></li>
+				{{ else }}
+				<li><a href="/login" role="button">Login</a></li>
+				{{ end }}
 			</ul>
 		</nav>
 		{{ template "content" . }}

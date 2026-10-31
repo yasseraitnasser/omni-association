@@ -30,7 +30,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := utils.Data{
-		PageTitle: "Omni-Association",
+		PageTitle:       "Omni-Association",
+		IsAuthenticated: false,
 	}
 	tmpl.Execute(w, data)
 }
@@ -162,10 +163,12 @@ func dashboardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := utils.DashboardData{
-		PageTitle:      "Omni-Association",
-		AssociationFee: associationFee,
-		ProjectCount:   projectCount,
-		Member:         member,
+		PageTitle:           "Omni-Association",
+		IsAuthenticated:     true,
+		AuthenticatedUserID: claims.ID,
+		AssociationFee:      associationFee,
+		ProjectCount:        projectCount,
+		Member:              member,
 	}
 	tmpl.Execute(w, data)
 }

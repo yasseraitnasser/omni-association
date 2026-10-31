@@ -183,7 +183,7 @@ func AssignCommitteeMember(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := auth.AuthenticateToken(w, r)
+	claims, err := auth.AuthenticateToken(w, r)
 	if err != nil {
 		return
 	}
@@ -206,8 +206,10 @@ func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := ProjectsPageData{
-		PageTitle: "Omni-Association",
-		Projects:  ProjectsList,
+		PageTitle:           "Omni-Association",
+		IsAuthenticated:     true,
+		AuthenticatedUserID: claims.ID,
+		Projects:            ProjectsList,
 	}
 
 	tmpl.Execute(w, data)

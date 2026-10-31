@@ -25,8 +25,10 @@ type Project struct {
 }
 
 type ProjectsPageData struct {
-	PageTitle string
-	Projects  []Project
+	PageTitle           string
+	IsAuthenticated     bool
+	AuthenticatedUserID int
+	Projects            []Project
 }
 
 func GetProjectdetails(w http.ResponseWriter, r *http.Request) {

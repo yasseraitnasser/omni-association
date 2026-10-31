@@ -10,8 +10,8 @@
 - [x] serve projects for authenticated users only
 - [x] add sections for missing data for creating a new project
 - [x] display the projects at the bottom of the projects page
-- [ ] fill the served pages with actual data from DB instead of dummy data
-- [ ] add a page that enables the user to see his contributions, donations ..etc
+- [x] fill the served pages with actual data from DB instead of dummy data
+- [x] add a page that enables the user to see his contributions, donations ..etc
 - [ ] add a button to delete a project(in the project full description page)
 - [ ] check for TODOs, FIXs, WARNs ..etc
 - [ ] set a max length for project name (in both backend and frontend)

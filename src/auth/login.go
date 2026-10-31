@@ -20,9 +20,11 @@ func ValidateLoginSchema(req LoginSchema) error {
 }
 
 type loginPageData struct {
-	PageTitle string
-	Error     string
-	Email     string
+	PageTitle           string
+	IsAuthenticated     bool
+	AuthenticatedUserID int
+	Error               string
+	Email               string
 }
 
 func renderLoginError(w http.ResponseWriter, r *http.Request, email string) {
@@ -37,9 +39,10 @@ func renderLoginError(w http.ResponseWriter, r *http.Request, email string) {
 	}
 
 	data := loginPageData{
-		PageTitle: "Omni-Association",
-		Error:     "Invalid email or password.",
-		Email:     email,
+		PageTitle:       "Omni-Association",
+		IsAuthenticated: false,
+		Error:           "Invalid email or password.",
+		Email:           email,
 	}
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Printf("template execute error: %v", err)

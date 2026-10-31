@@ -6,7 +6,9 @@ import (
 )
 
 type Data struct {
-	PageTitle string
+	PageTitle           string
+	IsAuthenticated     bool
+	AuthenticatedUserID int
 }
 
 type Member struct {
@@ -27,11 +29,13 @@ type History struct {
 }
 
 type DashboardData struct {
-	PageTitle      string
-	AssociationFee int
-	ProjectCount   int
-	Member         Member
-	History        []History
+	PageTitle           string
+	IsAuthenticated     bool
+	AuthenticatedUserID int
+	AssociationFee      int
+	ProjectCount        int
+	Member              Member
+	History             []History
 }
 
 type Claims struct {

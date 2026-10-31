@@ -28,13 +28,15 @@ type History struct {
 }
 
 type profileData struct {
-	PageTitle string
-	Member    utils.Member
-	History   []History
+	PageTitle           string
+	IsAuthenticated     bool
+	AuthenticatedUserID int
+	Member              utils.Member
+	History             []History
 }
 
 func GetMemberHistory(w http.ResponseWriter, r *http.Request) {
-	_, err := auth.AuthenticateToken(w, r)
+	claims, err := auth.AuthenticateToken(w, r)
 	if err != nil {
 		// auth.AuthenticateToken responds with the appropriate status code
 		return
@@ -115,9 +117,11 @@ func GetMemberHistory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := profileData{
-		PageTitle: "Omni-Association",
-		Member:    member,
-		History:   history,
+		PageTitle:           "Omni-Association",
+		IsAuthenticated:     true,
+		AuthenticatedUserID: claims.ID,
+		Member:              member,
+		History:             history,
 	}
 	tmpl.Execute(w, data)
 }
