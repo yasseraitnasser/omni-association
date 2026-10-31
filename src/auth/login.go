@@ -114,12 +114,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := AuthenticateToken(w, r)
-	if err == nil {
-		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-		return
-	}
-
 	tmpl, err := template.ParseFiles(
 		"src/templates/layouts/layout.html",
 		"src/templates/pages/login.html",
@@ -129,7 +123,8 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := loginPageData{
-		PageTitle: "Omni-Association",
+		PageTitle:       "Omni-Association",
+		IsAuthenticated: false,
 	}
 	tmpl.Execute(w, data)
 }
