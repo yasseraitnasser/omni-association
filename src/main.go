@@ -200,16 +200,26 @@ func RegisterMembershipPayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func createAssociation() {
-	query := `INSERT INTO association (name, current_fee) VALUES ($1, $2)`
-	name := "Omni-Association"
-	currentFee := 0
+	query := `SELECT id FROM association WHERE id = $1`
 
-	_, err := database.DB.Exec(query, name, currentFee)
+	_, err := database.DB.Query(query, 1)
 	if err != nil {
-		log.Fatalf("Error inerting membership_payments %v\n", err)
-	}
+		if errors.Is(err, sql.ErrNoRows) {
+			query = `INSERT INTO association (name, current_fee) VALUES ($1, $2)`
+			name := "Omni-Association"
+			currentFee := 0
 
-	log.Printf("Successfully inserted %s into the database", name)
+			_, err = database.DB.Exec(query, name, currentFee)
+			if err != nil {
+				log.Fatalf("Error inerting %s into association: %v\n", name, err)
+			}
+
+			log.Printf("Successfully inserted %s into the database", name)
+			return
+		}
+		log.Printf("Database error: %v\n", err)
+		return
+	}
 }
 
 func main() {
@@ -250,7 +260,7 @@ func main() {
 	}
 	defer database.DB.Close()
 
-	createAssociation() // FIX: do NOT insert everytime the server launches
+	createAssociation()
 
 	auth.AddAdminUser()
 	utils.InitValidator()
