@@ -50,7 +50,16 @@ type ProjectDetails struct {
 }
 
 func getProjectDetails(w http.ResponseWriter, projectID int) (*utils.Project, error) {
-	query := `SELECT id, name, description, budget, status, created_at FROM projects WHERE id = $1`
+	query := `SELECT p.id, p.name, p.description, p.budget, p.status, p.created_at,
+	COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) AS total_income,
+	COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0) AS total_expenses,
+	(COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) - 
+	COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)) AS remaining_balance
+	FROM projects p
+	LEFT JOIN transactions t ON p.id = t.project_id
+	WHERE p.id = $1
+	GROUP BY p.id
+	ORDER BY created_at DESC`
 	var project utils.Project
 
 	err := database.DB.QueryRow(query, projectID).Scan(
@@ -60,6 +69,9 @@ func getProjectDetails(w http.ResponseWriter, projectID int) (*utils.Project, er
 		&project.Budget,
 		&project.Status,
 		&project.CreatedAt,
+		&project.TotalIncome,
+		&project.TotalExpenses,
+		&project.RemainingBalance,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
