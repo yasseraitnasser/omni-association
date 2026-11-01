@@ -116,6 +116,20 @@ func GetMemberHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	query = `SELECT amount_paid FROM membership_payments WHERE member_id = $1 AND year = $2`
+	var tmp int
+
+	member.MembershipStatus = "Active (2026 Paid)"
+	err = database.DB.QueryRow(query, member.ID, 2026).Scan(&tmp)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			log.Printf("%v\n", err)
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
+		member.MembershipStatus = "Incative"
+	}
+
 	data := profileData{
 		PageTitle:           "Omni-Association",
 		IsAuthenticated:     true,

@@ -60,6 +60,19 @@ func MembersPageHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error during scanning rows", http.StatusInternalServerError)
 			return
 		}
+		m.HasPaidCurrentYear = true
+
+		query = `SELECT id FROM membership_payments WHERE member_id = $1 AND year = $2`
+		var tmp int
+
+		err = database.DB.QueryRow(query, m.ID, 2026).Scan(&tmp)
+		if err != nil {
+			if !errors.Is(err, sql.ErrNoRows) {
+				http.Error(w, "Database error", http.StatusInternalServerError)
+				return
+			}
+			m.HasPaidCurrentYear = false
+		}
 
 		members = append(members, m)
 	}

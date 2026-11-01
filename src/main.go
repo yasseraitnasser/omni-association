@@ -39,10 +39,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func getMemberData(w http.ResponseWriter, claims *utils.Claims) (utils.Member, error) {
-	query := `SELECT name, role, created_at FROM members WHERE id = $1`
+	query := `SELECT id, name, role, created_at FROM members WHERE id = $1`
 	var member utils.Member
 
-	err := database.DB.QueryRow(query, claims.ID).Scan(&member.Name, &member.Role, &member.CreatedAt)
+	err := database.DB.QueryRow(query, claims.ID).Scan(&member.ID, &member.Name, &member.Role, &member.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "No such member", http.StatusForbidden)
@@ -182,25 +182,6 @@ func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
 	return f
 }
 
-func RegisterMembershipPayment(w http.ResponseWriter, r *http.Request) {
-	query := `INSERT INTO membership_payments (member_id, amount_paid, year, receipt_url, paid_at) VALUES ($1, $2, $3, $4, $5)`
-	memberID := 1
-	amountPaid := 500
-	year := 2026
-	receiptURL := `0fbfd28dc5da_landscape-forest-photography-trees-wallpaper-preview.jpg`
-	paid_at := time.Now()
-
-	result, err := database.DB.Exec(query, memberID, amountPaid, year, receiptURL, paid_at)
-	if err != nil {
-		log.Printf("Error inerting membership_payments %v\n", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	insertedRowID, err := result.LastInsertId()
-	fmt.Fprintf(w, "Successfully inserted %d", insertedRowID)
-}
-
 func createAssociation() {
 	query := `SELECT id FROM association WHERE id = $1`
 
@@ -244,6 +225,7 @@ func main() {
 	router.HandleFunc("/login", auth.Login).Methods("POST")
 
 	router.HandleFunc("/api/members", members.MembersPageHandler).Methods("GET")
+	router.HandleFunc("/api/members/payments", members.MembershipPaymentsHandler).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
 
@@ -252,8 +234,6 @@ func main() {
 	router.HandleFunc("/api/projects/{id:[0-9]+}/committee", Chain(projects.AssignCommitteeMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/transactions", projects.CreateTransaction).Methods("POST")
 	router.HandleFunc("/api/projects/{id:[0-9]+}/report", projects.ProjectDetailsHandler).Methods("GET")
-
-	router.HandleFunc("/api/membership_payment", RegisterMembershipPayment).Methods("POST")
 
 	router.HandleFunc("/api/members/{id:[0-9]+}/history", members.GetMemberHistory).Methods("GET")
 
