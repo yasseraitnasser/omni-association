@@ -1,0 +1,83 @@
+{{ define "content" }}
+<section>
+	<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+		<h2>Association Members</h2>
+	</div>
+
+	<details>
+		<summary role="button" class="outline"
+			style="font-size: 0.85rem; padding: 0.3rem 0.8rem; width: 350px;">
+			Invite Member +</summary>
+		<article style="margin-top: 1rem; width: 350px;">
+			<form action="/api/members/invite" method="POST">
+				<label for="name">Full Name</label>
+				<input type="text" id="name" name="name" required placeholder="e.g. Yasser Ait Nasser">
+
+				<label for="email">Email Address</label>
+				<input type="email" id="email" name="email" required placeholder="name@example.com">
+
+				<label for="role">Role</label>
+				<select id="role" name="role" required>
+					<option value="member">Member</option>
+					<option value="advisor">Advisor</option>
+					<option value="assistant-general-secretary">Assistant General Secretary</option>
+					<option value="general-secretary">General Secretary</option>
+					<option value="assistant-treasurer">Assistant Treasurer</option>
+					<option value="treasurer">Treasurer</option>
+					<option value="vice-president">Vice-President</option>
+				</select>
+
+				<button type="submit" style="margin-top: 1rem; font-size: 0.85rem; padding: 0.4rem;">
+					Invite
+				</button>
+			</form>
+		</article>
+	</details>
+
+	{{ if .InviteURL }}
+	<article style="background-color: #eaf6ef; border-left: 5px solid #2ecc71; margin-bottom: 2rem;">
+		<header style="background: transparent; border: none;"><strong>Invite Generated Successfully!</strong>
+		</header>
+		<p>Share this secure link with the new member (Expires: {{ .ExpiresAt }})</p>
+		<input type="text" readonly value="{{ .InviteURL }}" onclick="this.select()"
+			style="background: white; font-family: monospace;" />
+	</article>
+	{{ end }}
+
+	{{ if .Members }}
+	<div class="overflow-auto">
+		<table class="striped">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Email</th>
+					<th>Role</th>
+					<th>Joined At</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range .Members }}
+				<tr>
+					<td><strong>{{ .Name }}</strong></td>
+					<td>{{ .Email }}</td>
+					<td><mark>{{ .Role }}</mark></td>
+					<td>{{ .CreatedAt.Format "2006-01-02" }}</td>
+					<td>
+						<a href="/api/members/{{ .ID }}/history" role="button"
+							class="outline secondary"
+							style="padding: 0.1rem 0.4rem; font-size: 0.75rem;">Profile
+							👤</a>
+					</td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
+	{{ else }}
+	<article>
+		<p><em>No members found in the association directory.</em></p>
+	</article>
+	{{ end }}
+</section>
+{{ end }}

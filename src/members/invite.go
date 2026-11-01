@@ -72,14 +72,18 @@ func savePendingMemberToDB(name, email, role, token string, expiry time.Time) er
 }
 
 func InviteMember(w http.ResponseWriter, r *http.Request) {
-	var req InviteMemberSchema
-	var err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
 	}
 
-	err = validateMemberInvitationSchema(req)
+	req := InviteMemberSchema{
+		Name:  r.FormValue("name"),
+		Email: r.FormValue("email"),
+		Role:  r.FormValue("role"),
+	}
+
+	err := validateMemberInvitationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid Schema", http.StatusUnprocessableEntity)
 		return
@@ -112,4 +116,5 @@ func InviteMember(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
+	// TODO: re-render the members page passing the generated invite URL instead of JSON
 }

@@ -15,10 +15,14 @@
 - [x] add a button to assign committee to project
 - [x] add a button to initiate a transaction
 - [x] login instead of logout for non authenticated users
+- [x] adjust registration protocol
+- [ ] add a button to register a membership payment
 - [ ] add a button to delete a project(in the project full description page)
 - [ ] net balance in the project details page
 - [ ] respond with files when proofs are requested
 - [ ] remove "create a new project+" for non board members (for assigning committees, creating transactions ..)
+- [ ] adjust "next renewal" in the dashboard
+- [ ] test colours for white theme
 - [ ] check for TODOs, FIXs, WARNs ..etc
 
 ## Bonus

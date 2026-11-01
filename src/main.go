@@ -26,7 +26,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		"src/templates/pages/home.html",
 	)
 	if err != nil {
-		log.Fatal("Error parsing html files")
+		log.Printf("%v\n", err)
+		http.Error(w, "Error during parsing HTML files", http.StatusInternalServerError)
+		return
 	}
 
 	data := utils.Data{
@@ -239,8 +241,9 @@ func main() {
 
 	router.HandleFunc("/login", auth.LoginPageHandler).Methods("GET")
 	router.HandleFunc("/logout", auth.LogoutHandler).Methods("GET")
-	router.HandleFunc("/login", (auth.Login)).Methods("POST")
+	router.HandleFunc("/login", auth.Login).Methods("POST")
 
+	router.HandleFunc("/api/members", members.MembersPageHandler).Methods("GET")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMember)).Methods("POST")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
 
