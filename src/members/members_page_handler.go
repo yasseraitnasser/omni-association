@@ -20,6 +20,7 @@ type MembersPageData struct {
 	InviteURL           string
 	ExpiresAt           time.Time
 	Members             []utils.Member
+	IsBoardMember       bool
 }
 
 func MembersPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +28,8 @@ func MembersPageHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+
+	isBoardMember := utils.IsBoardMember(*claims)
 
 	tmpl, err := template.ParseFiles(
 		"src/templates/layouts/layout.html",
@@ -82,6 +85,7 @@ func MembersPageHandler(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated:     true,
 		AuthenticatedUserID: claims.ID,
 		Members:             members,
+		IsBoardMember:       isBoardMember,
 	}
 	tmpl.Execute(w, data)
 }

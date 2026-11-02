@@ -20,7 +20,7 @@
 - [ ] check why on profile, the normal member's "Payment & Activity History" is broken
 - [x] add a button to register a membership payment
 - [x] net balance in the project details page
-- [ ] remove "create a new project+" for non board members (for assigning committees, creating transactions ..)
+- [x] remove "create a new project+" for non board members (for assigning committees, creating transactions ..)
 - [ ] add a button to delete a project(in the project full description page)
 - [ ] respond with files when proofs are requested
 - [ ] adjust "next renewal" in the dashboard

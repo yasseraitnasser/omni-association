@@ -9,6 +9,7 @@ type ProjectsPageData struct {
 	PageTitle           string
 	IsAuthenticated     bool
 	AuthenticatedUserID int
+	IsBoardMember       bool
 	Projects            []utils.Project
 }
 

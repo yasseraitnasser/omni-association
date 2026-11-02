@@ -33,6 +33,7 @@
 		<h3>Project Committee</h3>
 	</div>
 
+	{{ if .IsBoardMember }}
 	<details>
 		<summary role="button" class="outline" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">
 			Assign Member +</summary>
@@ -50,6 +51,7 @@
 				Project</button>
 		</form>
 	</details>
+	{{ end }}
 
 	{{ if .Committee }}
 	<div class="overflow-auto">
@@ -83,6 +85,7 @@
 	<div style="display: flex; justify-content: space-between; align-items: center;">
 		<h3>Transactions (Income & Expenses)</h3>
 	</div>
+	{{ if .IsBoardMember }}
 	<details>
 		<summary role="button" class="outline" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">Record
 			Transaction +</summary>
@@ -166,6 +169,7 @@
 			</form>
 		</article>
 	</details>
+	{{ end }}
 
 	{{ if .Transactions }}
 	<div class="overflow-auto">

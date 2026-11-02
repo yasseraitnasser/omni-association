@@ -24,7 +24,7 @@ type InviteResponseSchema struct {
 	ExpiresAt string `json:"expires_at"`
 }
 
-func IsBoardMember(next http.HandlerFunc) http.HandlerFunc {
+func IsBoardMemberMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		claims, err := auth.AuthenticateToken(w, r)
 		if err != nil {

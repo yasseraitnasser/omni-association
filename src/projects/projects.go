@@ -188,6 +188,8 @@ func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isBoardMember := utils.IsBoardMember(*claims)
+
 	ProjectsList, err := GetProjects()
 	if err != nil {
 		log.Printf("Error querying projects: %v\n", err)
@@ -208,6 +210,7 @@ func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
 	data := ProjectsPageData{
 		PageTitle:           "Omni-Association",
 		IsAuthenticated:     true,
+		IsBoardMember:       isBoardMember,
 		AuthenticatedUserID: claims.ID,
 		Projects:            ProjectsList,
 	}

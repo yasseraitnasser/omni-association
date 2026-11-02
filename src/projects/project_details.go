@@ -47,6 +47,7 @@ type ProjectDetails struct {
 	NetBalance          int
 	Committee           []Committee
 	Transactions        []Transaction
+	IsBoardMember       bool
 }
 
 func getProjectDetails(w http.ResponseWriter, projectID int) (*utils.Project, error) {
@@ -170,6 +171,8 @@ func ProjectDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isBoardMember := utils.IsBoardMember(*claims)
+
 	tmpl, err := template.ParseFiles(
 		"src/templates/layouts/layout.html",
 		"src/templates/pages/project_details.html",
@@ -210,6 +213,7 @@ func ProjectDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		Project:             *project,
 		Committee:           committees,
 		Transactions:        transactions,
+		IsBoardMember:       isBoardMember,
 	}
 
 	tmpl.Execute(w, data)

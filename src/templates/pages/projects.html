@@ -4,6 +4,7 @@
 		<h2>Projects</h2>
 	</div>
 
+	{{ if .IsBoardMember }}
 	<details style="margin-bottom: 2rem;">
 		<summary role="button" class="outline">Create a New Project +</summary>
 		<article>
@@ -32,6 +33,7 @@
 			</form>
 		</article>
 	</details>
+	{{ end }}
 
 	<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
 		{{ range .Projects }}
