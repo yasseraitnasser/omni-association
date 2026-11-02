@@ -47,14 +47,13 @@ type Claims struct {
 }
 
 type Project struct {
-	ID                        int
-	Name                      string
-	Description               string
-	Status                    string
-	Budget                    int
-	TotalIncome               int
-	TotalExpenses             int
-	RemainingBalance          int
-	FundingProgressPercentage float64
-	CreatedAt                 time.Time
+	ID               int
+	Name             string
+	Description      string
+	Status           string
+	Budget           int
+	TotalIncome      int
+	TotalExpenses    int
+	RemainingBalance int
+	CreatedAt        time.Time
 }

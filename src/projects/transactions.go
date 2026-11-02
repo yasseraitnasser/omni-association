@@ -49,7 +49,7 @@ func validateTransactionCreationSchema(req CreateTransactionSchema) error {
 	return utils.Validate.Struct(req)
 }
 
-func saveHashedFile(fileHeader *multipart.FileHeader) (string, error) {
+func SaveHashedFile(fileHeader *multipart.FileHeader) (string, error) {
 	src, err := fileHeader.Open()
 	if err != nil {
 		return "", err
@@ -123,7 +123,7 @@ func uploadDocs(w http.ResponseWriter, r *http.Request) (string, string, error) 
 
 	savedFiles := make([]string, 0, len(files))
 	for _, fileHeader := range files {
-		savedName, err := saveHashedFile(fileHeader)
+		savedName, err := SaveHashedFile(fileHeader)
 		if err != nil {
 			http.Error(w, "Failed to save file: "+err.Error(), http.StatusInternalServerError)
 			return "", "", err
@@ -244,5 +244,6 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	endpoint := "/api/projects/" + strconv.Itoa(projectID) + "/report"
+	http.Redirect(w, r, endpoint, http.StatusCreated)
 }

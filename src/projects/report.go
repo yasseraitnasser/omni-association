@@ -30,13 +30,6 @@ func GetProjects() ([]utils.Project, error) {
 	}
 	defer rows.Close()
 
-	// var response Project
-	// if response.Budget == 0 {
-	// 	response.FundingProgressPercentage = 100
-	// } else {
-	// 	response.FundingProgressPercentage = float64(response.TotalIncome) / float64(response.Budget) * 100
-	// } // TODO: calculate funding progress percentage
-
 	var projectsList []utils.Project
 	for rows.Next() {
 		var p utils.Project

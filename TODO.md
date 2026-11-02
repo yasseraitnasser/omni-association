@@ -17,12 +17,13 @@
 - [x] login instead of logout for non authenticated users
 - [x] adjust registration protocol
 - [x] add membership status in the profile page
-- [ ] check why on profile, the normal member's "Payment & Activity History" is broken
 - [x] add a button to register a membership payment
 - [x] net balance in the project details page
 - [x] remove "create a new project+" for non board members (for assigning committees, creating transactions ..)
-- [ ] add a button to delete a project(in the project full description page)
 - [ ] respond with files when proofs are requested
+- [ ] add a button to delete a project(in the project full description page)
+- [ ] add a button to change project status (from planning to active, completed ..etc)
+- [ ] check why on profile, the normal member's "Payment & Activity History" is broken
 - [ ] adjust "next renewal" in the dashboard
 - [ ] test colours for white theme
 - [ ] check for TODOs, FIXs, WARNs ..etc
