@@ -237,6 +237,8 @@ func main() {
 
 	router.HandleFunc("/api/members/{id:[0-9]+}/history", members.GetMemberHistory).Methods("GET")
 
+	router.HandleFunc("/uploads/{filename}", projects.UploadsHandler).Methods("GET")
+
 	err = database.InitDB()
 	if err != nil {
 		log.Fatalf("Could not connect to the database: %v", err)
