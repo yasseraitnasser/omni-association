@@ -227,6 +227,7 @@ func main() {
 	router.HandleFunc("/api/members", members.MembersPageHandler).Methods("GET")
 	router.HandleFunc("/api/members/payments", members.MembershipPaymentsHandler).Methods("POST")
 	router.HandleFunc("/api/members/invite", Chain(members.InviteMember, members.IsBoardMemberMiddleware)).Methods("POST")
+	router.HandleFunc("/accept-invite", members.AcceptInvitationPageHandler).Methods("GET")
 	router.HandleFunc("/api/members/accept", members.AcceptInvitation).Methods("POST")
 
 	router.HandleFunc("/projects", projects.ProjectsPageHandler).Methods("GET")

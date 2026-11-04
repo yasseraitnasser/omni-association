@@ -70,12 +70,12 @@
 	{{ end }}
 
 	{{ if .InviteURL }}
-	<article style="background-color: #eaf6ef; border-left: 5px solid #2ecc71; margin-bottom: 2rem;">
+	<article style="border-left: 5px solid #2ecc71; margin-bottom: 2rem;">
 		<header style="background: transparent; border: none;"><strong>Invite Generated Successfully!</strong>
 		</header>
-		<p>Share this secure link with the new member (Expires: {{ .ExpiresAt }})</p>
+		<p>Share this secure link with the new member (Expires: {{ .ExpiresAt.Format "2006-01-02 15:04" }})</p>
 		<input type="text" readonly value="{{ .InviteURL }}" onclick="this.select()"
-			style="background: white; font-family: monospace;" />
+			style="font-family: monospace;" />
 	</article>
 	{{ end }}
 

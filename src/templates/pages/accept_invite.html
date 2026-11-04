@@ -1,0 +1,33 @@
+{{ define "content" }}
+<section style="max-width: 500px; margin: 2rem auto;">
+	<article>
+		<header>
+			<h3 style="margin-bottom: 0;">Complete Your Membership</h3>
+			<small>{{ .PageTitle }} Onboarding</small>
+		</header>
+
+		{{ if .Error }}
+		<article style="border-left: 5px solid #ea4335; margin-bottom: 1rem; padding: 0.8rem;">
+			<p style="margin: 0; color: #c5221f; font-size: 0.9rem;"><strong>Error:</strong> {{ .Error }}
+			</p>
+		</article>
+		{{ end }}
+
+		<p>Welcome! Please set a strong password (minimum 12 characters) to activate your account.</p>
+
+		<form action="/api/members/accept" method="POST">
+			<input type="hidden" name="token" value="{{ .Token }}">
+
+			<label for="password">Choose Password</label>
+			<input type="password" id="password" name="password" minlength="12" required
+				placeholder="Minimum 12 characters">
+
+			<label for="confirm_password">Confirm Password</label>
+			<input type="password" id="confirm_password" name="confirm_password" minlength="12" required
+				placeholder="Re-enter password">
+
+			<button type="submit" style="margin-top: 1rem;">Activate Membership Account</button>
+		</form>
+	</article>
+</section>
+{{ end }}

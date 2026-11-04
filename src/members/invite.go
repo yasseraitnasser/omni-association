@@ -3,7 +3,6 @@ package members
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -17,11 +16,6 @@ type InviteMemberSchema struct {
 	Email string `json:"email" validate:"required,email"`
 	Name  string `json:"name"`
 	Role  string `json:"role" validate:"required,oneof=vice-president treasurer assistant-treasurer general-secretary assistant-general-secretary advisor member"`
-}
-
-type InviteResponseSchema struct {
-	InviteURL string `json:"invite_url"`
-	ExpiresAt string `json:"expires_at"`
 }
 
 func IsBoardMemberMiddleware(next http.HandlerFunc) http.HandlerFunc {
@@ -72,6 +66,11 @@ func savePendingMemberToDB(name, email, role, token string, expiry time.Time) er
 }
 
 func InviteMember(w http.ResponseWriter, r *http.Request) {
+	claims, err := auth.AuthenticateToken(w, r)
+	if err != nil {
+		return
+	}
+
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
@@ -83,7 +82,7 @@ func InviteMember(w http.ResponseWriter, r *http.Request) {
 		Role:  r.FormValue("role"),
 	}
 
-	err := validateMemberInvitationSchema(req)
+	err = validateMemberInvitationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid Schema", http.StatusUnprocessableEntity)
 		return
@@ -108,13 +107,6 @@ func InviteMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	inviteURL := "http://" + utils.SERVER_HOST + "/accept-invite?token=" + token
-	response := InviteResponseSchema{
-		InviteURL: inviteURL,
-		ExpiresAt: expiry.Format(time.RFC3339),
-	}
 
-	w.Header().Set("Content-type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
-	// TODO: re-render the members page passing the generated invite URL instead of JSON
+	RenderMembersPage(w, claims, inviteURL, expiry)
 }

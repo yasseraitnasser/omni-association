@@ -20,16 +20,17 @@
 - [x] add a button to register a membership payment
 - [x] net balance in the project details page
 - [x] remove "create a new project+" for non board members (for assigning committees, creating transactions ..)
-- [ ] complete invite member handler
-- [ ] respond with files when proofs are requested
+- [x] complete invite member handler
+- [x] respond with files when proofs are requested
+
+## Improvements
+- [ ] when accepting invitation, make sure the password and password confirmation have the same value
 - [ ] add a button to delete a project(in the project full description page)
 - [ ] add a button to change project status (from planning to active, completed ..etc)
 - [ ] check why on profile, the normal member's "Payment & Activity History" is broken
 - [ ] adjust "next renewal" in the dashboard
 - [ ] check for TODOs, FIXs, WARNs ..etc
 - [ ] test colours for white theme
-
-## Bonus
 - [ ] set a max length for project name (in both backend and frontend)
 - [ ] use a dummy hash for password comparaison
 - [ ] forward to the page the user requested instead of dashboard

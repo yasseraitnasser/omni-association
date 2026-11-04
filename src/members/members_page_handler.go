@@ -23,12 +23,7 @@ type MembersPageData struct {
 	IsBoardMember       bool
 }
 
-func MembersPageHandler(w http.ResponseWriter, r *http.Request) {
-	claims, err := auth.AuthenticateToken(w, r)
-	if err != nil {
-		return
-	}
-
+func RenderMembersPage(w http.ResponseWriter, claims *utils.Claims, inviteURL string, expiresAt time.Time) {
 	isBoardMember := utils.IsBoardMember(*claims)
 
 	tmpl, err := template.ParseFiles(
@@ -86,6 +81,17 @@ func MembersPageHandler(w http.ResponseWriter, r *http.Request) {
 		AuthenticatedUserID: claims.ID,
 		Members:             members,
 		IsBoardMember:       isBoardMember,
+		InviteURL:           inviteURL,
+		ExpiresAt:           expiresAt,
 	}
 	tmpl.Execute(w, data)
+}
+
+func MembersPageHandler(w http.ResponseWriter, r *http.Request) {
+	claims, err := auth.AuthenticateToken(w, r)
+	if err != nil {
+		return
+	}
+
+	RenderMembersPage(w, claims, "", time.Now())
 }
