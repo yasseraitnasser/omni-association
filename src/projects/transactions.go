@@ -49,7 +49,7 @@ func validateTransactionCreationSchema(req CreateTransactionSchema) error {
 	return utils.Validate.Struct(req)
 }
 
-func saveHashedFile(fileHeader *multipart.FileHeader) (string, error) {
+func SaveHashedFile(fileHeader *multipart.FileHeader) (string, error) {
 	src, err := fileHeader.Open()
 	if err != nil {
 		return "", err
@@ -123,7 +123,7 @@ func uploadDocs(w http.ResponseWriter, r *http.Request) (string, string, error) 
 
 	savedFiles := make([]string, 0, len(files))
 	for _, fileHeader := range files {
-		savedName, err := saveHashedFile(fileHeader)
+		savedName, err := SaveHashedFile(fileHeader)
 		if err != nil {
 			http.Error(w, "Failed to save file: "+err.Error(), http.StatusInternalServerError)
 			return "", "", err
@@ -170,8 +170,8 @@ func saveTransactionToDB(projectID, committeeID int, proofDocPath, receiptPath s
 }
 
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
-	claims := auth.AuthenticateToken(w, r)
-	if claims == nil {
+	claims, err := auth.AuthenticateToken(w, r)
+	if err != nil {
 		// auth.AuthenticateToken responds with the appropriate status code
 		return
 	}
@@ -195,7 +195,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.sanitize()
-	err := validateTransactionCreationSchema(req)
+	err = validateTransactionCreationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid schema", http.StatusBadRequest)
 		return
@@ -223,6 +223,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Not a committee member for this project", http.StatusForbidden)
 			return
 		}
+		log.Printf("%v\n", err)
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
@@ -243,5 +244,6 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	endpoint := "/api/projects/" + strconv.Itoa(projectID) + "/report"
+	http.Redirect(w, r, endpoint, http.StatusCreated)
 }

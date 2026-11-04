@@ -1,0 +1,219 @@
+{{ define "content" }}
+<section>
+
+	<article>
+		<header>
+			<div style="display: flex; justify-content: space-between; align-items: center;">
+				<h2>{{ .Project.Name }}</h2>
+				<mark>{{ .Project.Status }}</mark>
+			</div>
+		</header>
+
+		<p>{{ .Project.Description }}</p>
+
+		<div class="grid" style="margin-top: 1.5rem;">
+			<div>
+				<small><strong>Budget</strong></small>
+				<p><strong>{{ .Project.Budget }} MAD</strong></p>
+			</div>
+			<div>
+				<small><strong>Created At</strong></small>
+				<p>{{ .Project.CreatedAt.Format "January 2, 2006" }}</p>
+			</div>
+			<div>
+				<small><strong>Current Balance / Net</strong></small>
+				<p>{{ .Project.RemainingBalance }} MAD</p>
+			</div>
+		</div>
+	</article>
+
+	<br />
+
+	<div style="display: flex; justify-content: space-between; align-items: center;">
+		<h3>Project Committee</h3>
+	</div>
+
+	{{ if .IsBoardMember }}
+	<details>
+		<summary role="button" class="outline" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">
+			Assign Member +</summary>
+		<form action="/api/projects/{{ .Project.ID }}/committee" method="POST">
+			<label for="member_id">Member ID</label>
+			<input type="number" id="member_id" name="member_id" required placeholder="Enter Member ID">
+
+			<label for="role_in_project">Role</label>
+			<select id="role_in_project" name="role_in_project">
+				<option value="contributor">Contributor</option>
+				<option value="project-lead">Project Lead</option>
+			</select>
+
+			<button type="submit" style="font-size: 0.85rem; padding: 0.4rem;">Assign to
+				Project</button>
+		</form>
+	</details>
+	{{ end }}
+
+	{{ if .Committee }}
+	<div class="overflow-auto">
+		<table class="striped">
+			<thead>
+				<tr>
+					<th>Member Name</th>
+					<th>Role in Project</th>
+					<th>Joined At</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range .Committee }}
+				<tr>
+					<td><strong>{{ .Name }}</strong></td>
+					<td><mark>{{ .RoleInProject }}</mark></td>
+					<td>{{ .JoinAt.Format "2006-01-02" }}</td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
+	{{ else }}
+	<article>
+		<p><em>No committee members assigned to this project yet.</em></p>
+	</article>
+	{{ end }}
+
+	<br />
+
+	<div style="display: flex; justify-content: space-between; align-items: center;">
+		<h3>Transactions (Income & Expenses)</h3>
+	</div>
+	{{ if .IsBoardMember }}
+	<details>
+		<summary role="button" class="outline" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">Record
+			Transaction +</summary>
+		<article style="margin-top: 1rem;">
+			<form action="/api/projects/{{ .Project.ID }}/transactions" method="POST"
+				enctype="multipart/form-data">
+				<div class="grid">
+					<div>
+						<label for="type">Type</label>
+						<select id="type" name="type" required>
+							<option value="income">Income</option>
+							<option value="expense">Expense</option>
+						</select>
+					</div>
+					<div>
+						<label for="source">Source</label>
+						<select id="source" name="source" required>
+							<option value="member">Member</option>
+							<option value="donor_individual">Individual Donor</option>
+							<option value="government">Government</option>
+							<option value="external_association">External Association
+							</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="grid">
+					<div>
+						<label for="amount">Amount (MAD)</label>
+						<input type="number" id="amount" name="amount" required min="1">
+					</div>
+					<div>
+						<label for="payment_method">Payment Method</label>
+						<select id="payment_method" name="payment_method" required>
+							<option value="bank_transfer">Bank Transfer</option>
+							<option value="check">Check</option>
+							<option value="cash">Cash</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="grid">
+					<div>
+						<label for="donor_member_id">Donor Member ID (If source =
+							member)</label>
+						<input type="number" id="donor_member_id" name="donor_member_id">
+					</div>
+					<div>
+						<label for="external_entity_name">External Entity Name (If external
+							association)</label>
+						<input type="text" id="external_entity_name"
+							name="external_entity_name">
+					</div>
+				</div>
+
+				<div class="grid">
+					<div>
+						<label for="transaction_date">Date</label>
+						<input type="date" id="transaction_date" name="transaction_date"
+							required>
+					</div>
+					<div>
+						<label for="description">Description</label>
+						<input type="text" id="description" name="description" required
+							placeholder="Reason for transaction...">
+					</div>
+				</div>
+
+				<div class="grid">
+					<div>
+						<label for="receipt">Receipt (PDF/Image)</label>
+						<input type="file" id="receipt" name="receipt">
+					</div>
+					<div>
+						<label for="proof_doc">Proof Document (PDF/Image)</label>
+						<input type="file" id="proof_doc" name="proof_doc" required>
+					</div>
+				</div>
+
+				<button type="submit" style="margin-top: 1rem;">Save Transaction</button>
+			</form>
+		</article>
+	</details>
+	{{ end }}
+
+	{{ if .Transactions }}
+	<div class="overflow-auto">
+		<table class="striped">
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Type</th>
+					<th>Description</th>
+					<th>Source</th>
+					<th>Amount</th>
+					<th>Proof</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range .Transactions }}
+				<tr>
+					<td>{{ .TransactionDate.Format "2006-01-02" }}</td>
+					<td>
+						{{ if eq .Type "income" }}
+						<span style="color: green; font-weight: bold;">+ Income</span>
+						{{ else }}
+						<span style="color: red; font-weight: bold;">- Expense</span>
+						{{ end }}
+					</td>
+					<td>{{ .Description }}</td>
+					<td><small>{{ .Source }}</small></td>
+					<td><strong>{{ .Amount }} MAD</strong></td>
+					<td>
+						<a href="/uploads/{{ .ProofDocUrl }}" target="_blank" role="button"
+							class="outline secondary contrast"
+							style="padding: 0.1rem 0.4rem; font-size: 0.75rem;">
+							View 📄
+						</a>
+					</td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
+	{{ else }}
+	<article>
+		<p><em>No financial transactions recorded for this project yet.</em></p>
+	</article>
+	{{ end }}
+</section>
+{{ end }}

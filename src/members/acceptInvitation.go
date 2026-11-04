@@ -1,8 +1,9 @@
 package members
 
 import (
-	"encoding/json"
-	"log"
+	"database/sql"
+	"errors"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -10,25 +11,78 @@ import (
 	"github.com/yasseraitnasser/omni-association/src/utils"
 )
 
+type AcceptInvitationPageData struct {
+	PageTitle           string
+	IsAuthenticated     bool
+	AuthenticatedUserID int
+	Token               string
+	Password            string
+	Error               error
+}
+
 type AcceptInvitationSchema struct {
-	Token    string `json:"token"`
-	Password string `json:"password" validate:"required,min=12"`
+	Token    string
+	Password string
 }
 
 func validateAcceptInvitationSchema(req AcceptInvitationSchema) error {
 	return utils.Validate.Struct(req)
 }
 
-func AcceptInvitation(w http.ResponseWriter, r *http.Request) {
-	var req AcceptInvitationSchema
-	var err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		log.Printf("%v", err)
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+func AcceptInvitationPageHandler(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		http.Error(w, "Missing invitation token", http.StatusBadRequest)
 		return
 	}
 
-	err = validateAcceptInvitationSchema(req)
+	var expiresAt time.Time
+	query := `SELECT invite_expiry FROM members WHERE invite_token = $1`
+	err := database.DB.QueryRow(query, token).Scan(&expiresAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "Invalid or expired invitationtoken", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	if expiresAt.Before(time.Now()) {
+		http.Error(w, "The invitation link has expired. Please request a new one from a board member", http.StatusUnauthorized)
+		return
+	}
+
+	tmpl, err := template.ParseFiles(
+		"src/templates/layouts/layout.html",
+		"src/templates/pages/accept_invite.html",
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := AcceptInvitationPageData{
+		PageTitle:       "Omni-Association",
+		IsAuthenticated: false,
+		Token:           token,
+	}
+
+	tmpl.Execute(w, data)
+}
+
+func AcceptInvitation(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	req := AcceptInvitationSchema{
+		Token:    r.FormValue("token"),
+		Password: r.FormValue("password"),
+	}
+
+	err := validateAcceptInvitationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid schema", http.StatusUnprocessableEntity)
 		return
@@ -58,5 +112,5 @@ func AcceptInvitation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

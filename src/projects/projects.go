@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/lib/pq"
+	"github.com/yasseraitnasser/omni-association/src/auth"
 	"github.com/yasseraitnasser/omni-association/src/database"
 	"github.com/yasseraitnasser/omni-association/src/utils"
 )
@@ -60,15 +61,47 @@ func saveProjectToDB(projectName, descrption string, leaderID, budget int) error
 	return nil
 }
 
-func CreateProject(w http.ResponseWriter, r *http.Request) {
-	var req CreateProjectSchema
-	var err = json.NewDecoder(r.Body).Decode(&req)
+func parse_atoi(str string, w http.ResponseWriter) (int, error) {
+	integer, err := strconv.Atoi(str)
 	if err != nil {
+		log.Print(err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return 0, err
+	}
+
+	if integer < 0 {
+		log.Print(err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return 0, err
+	}
+
+	return integer, nil
+}
+
+func CreateProject(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		log.Print(err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	err = validateProjectCreationSchema(req)
+	LeaderID_str := r.PostFormValue("leader_id")
+	Budget_str := r.PostFormValue("budget")
+
+	LeaderID_int, LeaderID_err := parse_atoi(LeaderID_str, w)
+	Budget_int, Budget_err := parse_atoi(Budget_str, w)
+	if LeaderID_err != nil || Budget_err != nil {
+		return // response has already been made
+	}
+
+	req := CreateProjectSchema{
+		ProjectName: r.PostFormValue("project_name"),
+		Description: r.PostFormValue("description"),
+		LeaderID:    LeaderID_int,
+		Budget:      Budget_int,
+	}
+
+	err := validateProjectCreationSchema(req)
 	if err != nil {
 		http.Error(w, "Invalid Schema", http.StatusBadRequest)
 		return
@@ -92,7 +125,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	http.Redirect(w, r, "/projects", http.StatusSeeOther)
 }
 
 type AssignCommitteeSchema struct {
@@ -150,16 +183,37 @@ func AssignCommitteeMember(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProjectsPageHandler(w http.ResponseWriter, r *http.Request) {
+	claims, err := auth.AuthenticateToken(w, r)
+	if err != nil {
+		return
+	}
+
+	isBoardMember := utils.IsBoardMember(*claims)
+
+	ProjectsList, err := GetProjects()
+	if err != nil {
+		log.Printf("Error querying projects: %v\n", err)
+		http.Error(w, "Failed to load projects", http.StatusInternalServerError)
+		return
+	}
+
 	tmpl, err := template.ParseFiles(
 		"src/templates/layouts/layout.html",
 		"src/templates/pages/projects.html",
 	)
 	if err != nil {
-		log.Fatal("Error parsing html files")
+		log.Printf("Error parsing templates: %v\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
-	data := utils.Data{
-		PageTitle: "Omni-Association",
+	data := ProjectsPageData{
+		PageTitle:           "Omni-Association",
+		IsAuthenticated:     true,
+		IsBoardMember:       isBoardMember,
+		AuthenticatedUserID: claims.ID,
+		Projects:            ProjectsList,
 	}
+
 	tmpl.Execute(w, data)
 }

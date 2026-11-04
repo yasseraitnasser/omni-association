@@ -29,6 +29,8 @@ var SECURE_TOKEN_EXPIRY string
 var UPLOAD_DIR string
 var MAX_FILE_SIZE int
 
+var TOKEN_NAME string
+
 func InitEnv() error {
 	var err = godotenv.Load(".env")
 	if err != nil {
@@ -50,6 +52,8 @@ func InitEnv() error {
 
 	JWT_SECRET = os.Getenv("JWT_SECRET")
 	JWT_EXPIRY = os.Getenv("JWT_EXPIRY")
+
+	TOKEN_NAME = os.Getenv("TOKEN_NAME")
 
 	SECURE_TOKEN_LENGTH, err = strconv.Atoi(os.Getenv("SECURE_TOKEN_LENGTH"))
 	if err != nil {

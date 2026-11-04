@@ -3,7 +3,6 @@ package members
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -19,15 +18,10 @@ type InviteMemberSchema struct {
 	Role  string `json:"role" validate:"required,oneof=vice-president treasurer assistant-treasurer general-secretary assistant-general-secretary advisor member"`
 }
 
-type InviteResponseSchema struct {
-	InviteURL string `json:"invite_url"`
-	ExpiresAt string `json:"expires_at"`
-}
-
-func IsBoardMember(next http.HandlerFunc) http.HandlerFunc {
+func IsBoardMemberMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		claims := auth.AuthenticateToken(w, r)
-		if claims == nil {
+		claims, err := auth.AuthenticateToken(w, r)
+		if err != nil {
 			return
 		}
 
@@ -72,11 +66,20 @@ func savePendingMemberToDB(name, email, role, token string, expiry time.Time) er
 }
 
 func InviteMember(w http.ResponseWriter, r *http.Request) {
-	var req InviteMemberSchema
-	var err = json.NewDecoder(r.Body).Decode(&req)
+	claims, err := auth.AuthenticateToken(w, r)
 	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	req := InviteMemberSchema{
+		Name:  r.FormValue("name"),
+		Email: r.FormValue("email"),
+		Role:  r.FormValue("role"),
 	}
 
 	err = validateMemberInvitationSchema(req)
@@ -104,12 +107,6 @@ func InviteMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	inviteURL := "http://" + utils.SERVER_HOST + "/accept-invite?token=" + token
-	response := InviteResponseSchema{
-		InviteURL: inviteURL,
-		ExpiresAt: expiry.Format(time.RFC3339),
-	}
 
-	w.Header().Set("Content-type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	RenderMembersPage(w, claims, inviteURL, expiry)
 }
