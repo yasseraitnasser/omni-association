@@ -13,29 +13,14 @@ No heavy JavaScript frameworks, no Node.js build pipelines, and no necessary blo
 ├── go.mod                          # Go dependency manifest
 ├── go.sum                          # cryptographic checksum of module versions
 ├── .env.example                    # Example of local execution configuration
-├── src
-│   ├── auth
-│   │   ├── admin.go                # Admin user integration
-│   │   ├── jwt.go                  # JWT generation and authentication
-│   │   └── login.go                # Login (validating credentials)
-│   ├── database
-│   │   ├── database.go             # Go connection pool init (sql.Open + Ping)
-│   │   └── migrations
-│   │       └── 000_INITIAL.sql     # Base database schemas, types, and constraints
-│   ├── main.go                     # Server orchestration layer & routing table
-│   ├── members
-│   │   └── members.go              # Members management (invite, accept, decline ..)
-│   ├── projects
-│   │   ├── projects.go             # Project creation and management with committee assignment
-│   │   ├── report.go               # Project report (summary of the project states, incomes, expenses ..)
-│   │   └── transactions.go         # Project transactions tracking (income, expenses, documentations ..)
-│   ├── templates
-│   │   └── layouts
-│   │       └── layout.html         # Base HTML layout skeleton
-│   └── utils
-│       ├── env.go                  # Env variables load
-│       ├── password.go             # Password hashing and comparaison
-│       └── validate.go             # Struct validation
+└── src
+    ├── auth                        # Authentication & session management
+    ├── database                    # Persistent layer
+    ├── members                     # Member management (invite, payments, history ..)
+    ├── projects                    # Project tracking, reports, and transactions ..
+    ├── templates                   # Server-side HTML templates
+    ├── utils                       # Shared helpers and utilities
+    └── main.go                     # Server orchestration layer & routing table
 
 ```
 
@@ -72,6 +57,8 @@ SECURE_TOKEN_EXPIRY=24h
 
 UPLOAD_DIR=./uploads
 MAX_FILE_SIZE=2
+
+TOKEN_NAME=omni_token
 ```
 3. Execution Pipeline (Makefile Execution)
 Everything else is abstracted away by the Makefile, Run `make help` (or simply `make`) to list targets, or use the code workflows below:
@@ -115,5 +102,5 @@ Below is the current checklist of requirements and features for this project.
 - [x] On the platform, each subscriber will be able to view their history, including their donations, subscription status, and outstanding balances owed to the association.
 
 ## Quick Progress Summary
-- Completed: 12 / 13 (92%)
-- Status: In Active Development
+- Completed: 13 / 13 (100%)
+- Status: MVP done
